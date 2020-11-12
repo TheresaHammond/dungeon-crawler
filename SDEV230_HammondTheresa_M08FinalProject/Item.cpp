@@ -7,6 +7,7 @@ using namespace std;
 
 Item::Item(void) { // CONSTRUCTOR
 	this->takeable = true;
+	this->equippable = false;
 	this->name = "Default Item";
 	this->desc = "This item does nothing.";
 	this->location = "HERE.";
@@ -17,6 +18,7 @@ Item::Item(void) { // CONSTRUCTOR
 		++it;
 	}
 	this->location = *it;
+	this->power = 0;
 }
 string Item::get_name() { // name getter
 	return name;

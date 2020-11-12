@@ -8,6 +8,9 @@ using namespace std;
 
 Player::Player(void) { // CONSTRUCTOR
 	this->hp = 100;
+	this->str = 5;
+	this->def = 5;
+	this->intel = 5;
 }
 // ADD ITEM TO BACKPACK
 void Player::addto_backpack(Item* item) {

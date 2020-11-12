@@ -17,37 +17,112 @@
 using namespace std;
 
 // DEFINE FUNCTIONS
-// main menu function!
-void main_menu(Player& player, Room &room) { // PASS OBJS BY REFERENCE!!!!!!!
-	int choice;
-	cout << "\nWhat will you do next?" << endl;
-	cout << "1 . . . Look" << endl; // player.look(Room &player.location);
-	cout << "2 . . . Move" << endl;
-	cout << "3 . . . Open backpack" << endl; // player.open_backpack();
-	cout << "4 . . . Check stats" << endl; // player.get_stats();
-	cout << "Enter choice: ";
-	cin >> choice;
 
-	switch (choice) { // actions based on choice
-	case 1: // Look
-		// room = player.get_room();
-		//cout << "\nYou look at the room around you." << endl;
-		//(player.get_room()).look(); // display player room's item list
-		player.look();
-		break;
-	case 2: // Move
-		cout << "\nNot yet implemented." << endl;
-		break;
-	case 3: // Open backpack
-		cout << "\n>> You open your backpack." << endl;
-		player.open_backpack(); // open the inventory (list items)
-		break;
-	case 4: // Check stats
-		cout << "\n>> You take stock of your current state." << endl;
-		player.get_stats(); // list player stats
-		break;
-	default:
-		cout << "\n>> You do nothing." << endl;
+
+// combat state!
+bool state_combat(Player &player, Room &room, Entity &entity) {
+	int choice;
+	int damage = 0;
+	if (player.get_hp() <= 0) { // you died
+		return false; // leave combat state
+	} else if (entity.get_hp() <= 0) {
+		cout << "\n>> Enemy " << entity.get_name() << " has been defeated!" << endl;
+		// run post-combat stuff
+		return false; // leave combat state
+	} else {
+		cout << "\nWhat's your next move?" << endl;
+		cout << "1 . . . Attack" << endl; // attack enemy
+		cout << "2 . . . Defend" << endl; // defend from attack
+		cout << "3 . . . Open backpack" << endl; // player.open_backpack();
+		cout << "4 . . . Use spell" << endl; // open spellbook
+		cout << "5 . . . Talk" << endl; // attempt to communicate
+		cout << "6 . . . Run" << endl; // go back to previous room (if possible)
+		cout << "Enter choice: ";
+		cin >> choice;
+
+		switch (choice) { // actions based on choice
+		case 1: // Attack
+			cout << "\n>> You attack the " << entity.get_name() << "!" << endl;
+			// calculate damage
+			damage = 30; // change this later
+			if (damage < 0) damage = 0; // prevent negative numbers
+			cout << ">> The enemy " << entity.get_name() << " takes " << damage << " damage." << endl;
+			entity.set_hp(damage);
+			break;
+		case 2: // Defend
+			cout << "\n>> Not yet implemented." << endl;
+			break;
+		case 3: // Open backpack
+			cout << "\n>> You open your backpack." << endl;
+			player.open_backpack(); // open the inventory (list items)
+			break;
+		case 4: // Use spell
+			cout << "\n>> Not yet implemented." << endl;
+			break;
+		case 5: // Talk
+			cout << "\n>> Not yet implemented." << endl;
+			break;
+		case 6: // Run
+			cout << "\n>> You attempt to flee!" << endl;
+			cout << ">> You escape to the previous room." << endl;
+			return false; // leave combat state
+			break;
+		default:
+			cout << "\n>> You do nothing." << endl;
+		}
+
+		// ENEMY ATTACK ALGORITHM HERE!
+		cout << "\n>> Enemy " << entity.get_name() << " attacks!" << endl;
+		damage = 10; // change this later
+		if (damage < 0) damage = 0; // prevent negative numbers
+		cout << ">> You take " << damage << " damage." << endl;
+		player.set_hp(damage);
+	}
+}
+
+// main menu function!
+bool state_main(Player& player, Room& room, Entity& entity) { // PASS OBJS BY REFERENCE!!!!!!!
+	// if room has enemy, switch to combat state (while loop). else:
+	int choice;
+	bool combat = true;
+	cout << "\n>> " << entity.get_name() << " attacks you!" << endl;
+	while (combat) {
+		combat = state_combat(player, room, entity);
+	}
+	if (player.get_hp() <= 0) {
+		cout << "\n>> You are dead." << endl;
+		return true; // game is over, you're dead
+	}
+	else {
+		cout << "\nWhat will you do next?" << endl;
+		cout << "1 . . . Look" << endl; // player.look(Room &player.location);
+		cout << "2 . . . Move" << endl;
+		cout << "3 . . . Open backpack" << endl; // player.open_backpack();
+		cout << "4 . . . Check stats" << endl; // player.get_stats();
+		cout << "Enter choice: ";
+		cin >> choice;
+
+		switch (choice) { // actions based on choice
+		case 1: // Look
+			// room = player.get_room();
+			//cout << "\nYou look at the room around you." << endl;
+			//(player.get_room()).look(); // display player room's item list
+			player.look();
+			break;
+		case 2: // Move
+			cout << "\nNot yet implemented." << endl;
+			break;
+		case 3: // Open backpack
+			cout << "\n>> You open your backpack." << endl;
+			player.open_backpack(); // open the inventory (list items)
+			break;
+		case 4: // Check stats
+			cout << "\n>> You take stock of your current state." << endl;
+			player.get_stats(); // list player stats
+			break;
+		default:
+			cout << "\n>> You do nothing." << endl;
+		}
 	}
 }
 
@@ -73,11 +148,12 @@ int main(void)
 	// CREATE OBJS
 	Player player;
 	Room room;
+	Entity entity; // enemy
 
 	// fill backpack
-	//item1 = new HealthPotion; // yay polymorphism
+	item1 = new HealthPotion; // yay polymorphism
 
-	//player.addto_backpack(item1);
+	player.addto_backpack(item1);
 	// be careful because this has HUGE POTENTIAL to create a memory leak!!
 
 
@@ -102,6 +178,7 @@ int main(void)
 	// this has to be done before passing room reference to player, because... i don't know
 
 	player.set_room(room); // set player location inside starting room
+	entity.set_room(room); // put an enemy in room (for testing)
 
 	// describe starting room
 	room.describe();
@@ -109,8 +186,10 @@ int main(void)
 	// MAIN GAME LOOP
 	while (!game_end) { // until game_end is True
 		// run menu script
-		main_menu(player, room); // open menu, pass current player reference in
+		game_end = state_main(player, room, entity); // open menu, pass current player reference in
 	}
+	// post-game stuff
+	cout << "\n>> Your journey has ended." << endl;
 
 
 
