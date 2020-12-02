@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BigDoor.cpp" />
     <ClCompile Include="Door.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="HealthPotion.cpp" />
@@ -149,6 +150,7 @@
     <ClCompile Include="SDEV230_HammondTheresa_M08FinalProject.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BigDoor.h" />
     <ClInclude Include="Door.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="HealthPotion.h" />

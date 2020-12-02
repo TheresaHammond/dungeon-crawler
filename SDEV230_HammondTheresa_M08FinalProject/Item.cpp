@@ -7,6 +7,7 @@ using namespace std;
 
 Item::Item(void) { // CONSTRUCTOR
 	this->takeable = true;
+	this->equippable = false;
 	this->name = "Default Item";
 	this->desc = "This item does nothing.";
 	this->location = "HERE.";

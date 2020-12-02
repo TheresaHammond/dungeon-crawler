@@ -13,6 +13,7 @@ protected:
 	list<string> locations; // list of available interactions
 public:
 	bool takeable;
+	bool equippable;
 	Item(void);
 	string get_name();
 	string get_location();
