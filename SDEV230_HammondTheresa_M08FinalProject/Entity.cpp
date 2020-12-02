@@ -37,10 +37,10 @@ void Entity::set_intel(int change) { // intel setter
 int Entity::get_intel() { // intel getter
 	return intel;
 }
-void Entity::set_room(Room& room) { // room setter
+void Entity::set_room(Room* room) { // room setter
 	this->room = room;
 }
-Room& Entity::get_room() { // room getter
+Room* Entity::get_room() { // room getter
 	return this->room;
 }
 void Entity::set_name(string name) { // name setter

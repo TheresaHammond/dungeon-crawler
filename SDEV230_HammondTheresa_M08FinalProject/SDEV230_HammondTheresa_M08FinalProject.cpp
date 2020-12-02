@@ -16,11 +16,12 @@
 
 using namespace std;
 
+// GLOBAL VARS
+// bool debug = true; // debug flag
+
 // DEFINE FUNCTIONS
-
-
 // combat state!
-bool state_combat(Player &player, Room &room, Entity &entity) {
+bool state_combat(Player &player, Room* room, Entity &entity) {
 	int choice;
 	int damage = 0;
 	if (player.get_hp() <= 0) { // you died
@@ -81,48 +82,53 @@ bool state_combat(Player &player, Room &room, Entity &entity) {
 }
 
 // main menu function!
-bool state_main(Player& player, Room& room, Entity& entity) { // PASS OBJS BY REFERENCE!!!!!!!
-	// if room has enemy, switch to combat state (while loop). else:
+bool state_main(Player& player, Map& map) { // PASS OBJS BY REFERENCE!!!!!!!
+	// if player's room has enemy, switch to combat state (while loop). else:
 	int choice;
-	bool combat = true;
+	/* bool combat = true;
 	cout << "\n>> " << entity.get_name() << " attacks you!" << endl;
 	while (combat) {
-		combat = state_combat(player, room, entity);
+		combat = state_combat(player, entity);
 	}
 	if (player.get_hp() <= 0) {
 		cout << "\n>> You are dead." << endl;
 		return true; // game is over, you're dead
 	}
-	else {
+	else { */
+	cout << "DEBUG: You are in room (" << (player.get_room())->get_x() << ", " << (player.get_room())->get_y() << ")" << endl;
 		cout << "\nWhat will you do next?" << endl;
-		cout << "1 . . . Look" << endl; // player.look(Room &player.location);
+		cout << "1 . . . Look" << endl; // 
 		cout << "2 . . . Move" << endl;
-		cout << "3 . . . Open backpack" << endl; // player.open_backpack();
-		cout << "4 . . . Check stats" << endl; // player.get_stats();
+		cout << "3 . . . Open backpack" << endl;
+		cout << "4 . . . Check map" << endl;
+		cout << "5 . . . Check stats" << endl; 
 		cout << "Enter choice: ";
 		cin >> choice;
 
 		switch (choice) { // actions based on choice
 		case 1: // Look
-			// room = player.get_room();
-			//cout << "\nYou look at the room around you." << endl;
-			//(player.get_room()).look(); // display player room's item list
 			player.look();
-			break;
+			return false; // break loop, loop again
 		case 2: // Move
-			cout << "\nNot yet implemented." << endl;
-			break;
+			// cout << "\nNot yet implemented." << endl;
+			player.move();
+			return false;
 		case 3: // Open backpack
 			cout << "\n>> You open your backpack." << endl;
-			player.open_backpack(); // open the inventory (list items)
-			break;
-		case 4: // Check stats
+			player.open_backpack(); // open the inventory (list of items)
+			return false;
+		case 4: // Check map
+			cout << "\n>> You open your map." << endl;
+			map.draw_full(player);
+			return false;
+		case 5: // Check stats
 			cout << "\n>> You take stock of your current state." << endl;
 			player.get_stats(); // list player stats
-			break;
+			return false;
 		default:
-			cout << "\n>> You do nothing." << endl;
-		}
+			cout << "\n>> Menu error." << endl;
+			return true;
+		//}
 	}
 }
 
@@ -130,181 +136,77 @@ bool state_main(Player& player, Room& room, Entity& entity) { // PASS OBJS BY RE
 int main(void)
 {
 	// INITIALIZE VARIABLES
-	int size = 5; // length of square grid side
-	int x, y, x2, y2, random, random2;
-	Room* map[5][5]; // map grid; full of pointers to Room objects!
-	int* arr;
-	int count = 0;
-	string direction;
 	string name;
 	int choice;
+	int map_size; // changes based on difficulty
 	Item* item1; // pointer to new item created (to put in inventory)
 	Item* item2;
 	bool game_end = false; // flag to end game loop
+	int move_count = 0; // counts number of times player has changed rooms
 
 	// INITIALIZE RANDOM SEED
 	srand(time(NULL));
 
+	cout << "~~~~~ WELCOME TO GAME NAME ~~~~~" << endl;
+	cout << "\nSelect dungeon size: " << endl;
+	cout << "1 . . . Small" << endl;
+	cout << "2 . . . Medium" << endl;
+	cout << "3 . . . Large" << endl;
+	cout << "Enter choice: ";
+	cin >> choice;
+
+	switch (choice) {
+	case 2: // small
+		cout << "\n>> Medium dungeon selected.";
+		map_size = 5;
+		break;
+	case 3: // large
+		cout << "\n>> Large dungeon selected.";
+		map_size = 6;
+		break;
+	default: // default to small
+		cout << "\n>> Small dungeon selected.";
+		map_size = 4;
+	}
+
 	// CREATE OBJS
+	// player obj
 	Player player;
-	Room room;
-	Entity entity; // enemy
 
-	// fill backpack
-	item1 = new HealthPotion; // yay polymorphism
+	// generate map and set player in starting room
+	Map map(map_size, player); 
 
-	player.addto_backpack(item1);
-	// be careful because this has HUGE POTENTIAL to create a memory leak!!
-
+	// show map (DEBUG)
+	map.draw_full(player);
 
 	// pregame setup (get player name, generate map)
-	cout << "~~~~~ GAME NAME ~~~~~" << endl;
+	cout << "~~~~~ GAME START ~~~~~" << endl;
 	cout << "\nYou have been trapped inside a dungeon and must find your way out. Good luck!" << endl;
 	// get player name and set up stats
+	cout << "\n>> You awaken in a strange new place." << endl;
 	cout << "\nPlease enter your name: ";
-	getline(cin, name);
+	cin >> name;
 	if (name == "") {
 		name = "Default Dan";
 	}
 	player.set_name(name);
-	cout << "\n>> You are " << player.get_name() << ". Your starting stats are:" << endl;
+	cout << endl << "\n>> You are " << player.get_name() << ". Your starting stats are:" << endl;
 	player.get_stats();
 
-	cout << "\n>> You awaken in a strange new place." << endl;
-
-	// add items to starting room
-	item2 = new HealthPotion;
-	room.add_item(item2); // put item in room (on floor, i guess)
-	// this has to be done before passing room reference to player, because... i don't know
-
-	player.set_room(room); // set player location inside starting room
-	entity.set_room(room); // put an enemy in room (for testing)
-
 	// describe starting room
-	room.describe();
+	(player.get_room())->describe();
+	// set starting room as visited (set after so it describes as new)
+	(player.get_room())->set_visited();
 
 	// MAIN GAME LOOP
 	while (!game_end) { // until game_end is True
 		// run menu script
-		game_end = state_main(player, room, entity); // open menu, pass current player reference in
+		game_end = state_main(player, map); // open menu, pass current player reference in
 	}
 	// post-game stuff
 	cout << "\n>> Your journey has ended." << endl;
 
-
-
-	/* // GENERATE DUNGEON MAP
-
-	// fill map array with room objects
-	for (int i = 0; i < size; i++) {
-		for (int j = 0; j < size; j++) {
-			map[i][j] = new Room(); // create new room in each square
-		}
-	}
-
-
-	// GENERATE ENTRANCE AND EXIT LOCATIONS
-
-	// GENERATE ENTRANCE. ENTRANCE MUST BE ON EDGE! repeat until it is located on an edge space
-	do {
-		// generates random int between 0 and grid size
-		x = rand() % size; // column coordinate
-		y = rand() % size; // row coordinate
-		//cout << "(" << x << ", " << y << ")" << endl;
-	} while (((x != 0) && (x != size-1)) && ((y != 0) && (y != size - 1)));
-
-	// when successful, mark that room as existing and also the entrance
-	map[x][y]->is_entrance = true;
-	map[x][y]->exists = true;
-	map[x][y]->map_icon = "[S]";
-
-	// GENERATE EXIT (MUST ALSO BE ON EDGE)
-	// must not occupy same square as entrance!
-	do {
-		// generates random int between 0 and grid size
-		x2 = rand() % size; // column coordinate
-		y2 = rand() % size; // row coordinate
-		//cout << "(" << x << ", " << y << ")" << endl;
-	} while (((x2 != 0) && (x2 != size - 1)) && ((y2 != 0) && (y2 != size - 1)) && ((x2 != x) && (y2 != y)));
-
-	// when successful, mark that room as existing and also the exit
-	map[x2][y2]->is_exit = true;
-	map[x2][y2]->exists = true;
-	map[x2][y2]->map_icon = "[X]";
-
-	// PATH GENERATION ALGORITHM
-	// seed random rooms first
-	for (int i = 0; i < size; i++) {
-		for (int j = 0; j < size; j++) {
-			random = rand() % 100 + 1; // generate random number between 1 and 100
-			// small chance to generate room into existence if it doesn't already exist
-			if ((random < 10) && (map[i][j]->exists == false)) {
-				map[i][j]->exists = true;
-				map[i][j]->map_icon = "[O]";
-			}
-		}
-	}
-
-	// ROOM CONNECTION ALGORITHM
-	// this algorithm should randomly generate a number of connected rooms for a
-	// seeded room, then generate a random direction for those rooms to be in
-	// relative to the seed, then create those new rooms
-
-	for (int i = 0; i < size; i++) { // cols
-		for (int j = 0; j < size; j++) { // rows
-			// if room exists and has no doors, generate connecting rooms
-			if ((map[i][j]->exists == true) && (map[i][j]->doors == 0)) {
-				// generate random number of possible doors for room (1 to 2)
-				random = rand() % 2 + 1; // this will be saved for number of actual doors
-				cout << "Doors: " << random << endl;
-				arr = new int[random]; // create array with size of number of doors
-
-				// NOTE: THIS ONLY CREATES AND USES ONE ARRAY; NEED TO STORE THIS INFO
-				// IN AN ARRAY UNIQUE TO EACH ROOM????
-				// for each space in array, generate a random number to put in array
-				// repeat random gen over and over until full of unique numbers
-				while (count < random) {
-					random2 = rand() % 4 + 1; // between 1 and 4, for cardinal directions
-					// iterate through array to find a match of current direction
-					for (int f = 0; f < random; f++) {
-						if (random2 == arr[f]) break; // if match found, skip and try again
-						else if (f == random - 1) { // if no match found, is not duplicate
-							arr[count] = random2; // put number in array!
-							count++; // increment unique number counter
-						}
-					}
-				}
-				// when this is done, print array
-				for (int i = 0; i < random; i++) {
-					cout << "[" << arr[i] << "]" << endl;
-				}
-
-			}
-
-		}
-	}
-
-
-
-
-
-
-
-
-
-
-	cout << endl;
-	// DRAW MAP
-	for (int i = 0; i < size; i++) {
-		for (int j = 0; j < size; j++) {
-			cout << map[i][j]->map_icon; // draw map icon for each room!
-		}
-		cout << endl; // return for next row
-	} */
-
-
-
-
+	// scoring output goes here
 
 	return 0;
 }

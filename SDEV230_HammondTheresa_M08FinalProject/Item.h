@@ -8,11 +8,9 @@ using namespace std;
 class Item { // base item class (should this be an abstract class...?)
 protected:
 	string name;
-	string type;
 	string desc;
 	string location;
-	list<string> locations; // random in-room location for flavor text
-	int power;
+	list<string> locations; // list of available interactions
 public:
 	bool takeable;
 	bool equippable;

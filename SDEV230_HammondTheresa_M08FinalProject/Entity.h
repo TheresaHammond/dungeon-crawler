@@ -11,12 +11,10 @@ class Entity {
 protected:
 	int hp; // health
 	string name;
-	Room room; // location
+	Room* room; // pointer to current location
 	int str; // strength
 	int def; // defense
 	int intel; // intelligence
-	Item weapon; // equipped weapon
-	Item armor; // equipped armor
 public:
 	Entity(void);
 	void set_hp(int change);
@@ -27,10 +25,8 @@ public:
 	int get_str();
 	void set_def(int change);
 	int get_def();
-	// void set_weapon(Item item);
-	// Item get_weapon();
-	void set_room(Room& room);
-	Room& get_room();
+	void set_room(Room* room);
+	Room* get_room();
 	void set_name(string name);
 	string get_name();
 	void get_stats();

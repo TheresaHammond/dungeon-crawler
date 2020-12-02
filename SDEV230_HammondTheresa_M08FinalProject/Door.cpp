@@ -5,7 +5,14 @@
 
 using namespace std;
 
-Door::Door(void) { // CONSTRUCTOR
+Door::Door(void) { // def con
+}
+
+Door::Door(Room* current, Room* next) { // constructor!
+	cout << "New door constructed!" << endl;
+	for (int i = 0; i < 2; i++) {
+		a_rooms[i] = 0; // initialize all pointers as null
+	}
 	this->open = false; // closed and unlocked by default
 	this->locked = false;
 	this->name = "Door";
@@ -13,6 +20,8 @@ Door::Door(void) { // CONSTRUCTOR
 	list<string> locations{ "" }; // leave blank for now
 	this->location = "nearby";
 	this->takeable = false;
+	this->a_rooms[0] = current; // insert connecting rooms to door ref
+	this->a_rooms[1] = next;
 }
 
 void Door::status() {

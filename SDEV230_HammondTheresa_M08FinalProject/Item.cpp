@@ -18,7 +18,6 @@ Item::Item(void) { // CONSTRUCTOR
 		++it;
 	}
 	this->location = *it;
-	this->power = 0;
 }
 string Item::get_name() { // name getter
 	return name;
