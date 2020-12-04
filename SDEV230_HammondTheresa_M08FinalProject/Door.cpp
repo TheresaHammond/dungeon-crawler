@@ -24,6 +24,10 @@ Door::Door(Room* current, Room* next) { // constructor!
 	this->a_rooms[1] = next;
 }
 
+Door::~Door(void) { // destructor
+	cout << "DOOR DELETED." << endl;
+}
+
 void Door::status() {
 	if (!open && !locked) { // closed and unlocked
 		cout << ">> The " << this->get_name() << " is closed." << endl;

@@ -1,16 +1,16 @@
 #pragma once
 
 #include "Item.h"
-#include "Room.h"
+
 #include <iostream>
 #include <string>
 
-using namespace std;
+class Room;
 
 class Entity {
 protected:
 	int hp; // health
-	string name;
+	std::string name;
 	Room* room; // pointer to current location
 	int str; // strength
 	int def; // defense
@@ -28,6 +28,6 @@ public:
 	void set_room(Room* room);
 	Room* get_room();
 	void set_name(string name);
-	string get_name();
+	std::string get_name();
 	void get_stats();
 };

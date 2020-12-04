@@ -6,7 +6,9 @@
 using namespace std;
 
 class Item { // base item class (should this be an abstract class...?)
+	friend class Player;
 protected:
+	bool multiuse; // flag for whether item can be used more than once
 	string name;
 	string desc;
 	string location;

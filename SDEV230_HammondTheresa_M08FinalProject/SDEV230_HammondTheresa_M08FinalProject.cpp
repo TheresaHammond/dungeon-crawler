@@ -126,8 +126,8 @@ bool state_main(Player& player, Map& map) { // PASS OBJS BY REFERENCE!!!!!!!
 			player.get_stats(); // list player stats
 			return false;
 		default:
-			cout << "\n>> Menu error." << endl;
-			return true;
+			cout << "\n>> You decide to do nothing." << endl;
+			return false;
 		//}
 	}
 }
@@ -179,16 +179,15 @@ int main(void)
 	// show map (DEBUG)
 	map.draw_full(player);
 
-	// pregame setup (get player name, generate map)
+	// pregame setup
 	cout << "~~~~~ GAME START ~~~~~" << endl;
 	cout << "\nYou have been trapped inside a dungeon and must find your way out. Good luck!" << endl;
+
 	// get player name and set up stats
 	cout << "\n>> You awaken in a strange new place." << endl;
 	cout << "\nPlease enter your name: ";
 	cin >> name;
-	if (name == "") {
-		name = "Default Dan";
-	}
+	if (name == "") name = "Default Dan";
 	player.set_name(name);
 	cout << endl << "\n>> You are " << player.get_name() << ". Your starting stats are:" << endl;
 	player.get_stats();

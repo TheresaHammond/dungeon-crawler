@@ -6,6 +6,7 @@
 using namespace std;
 
 Item::Item(void) { // CONSTRUCTOR
+	this->multiuse = false;
 	this->takeable = true;
 	this->equippable = false;
 	this->name = "Default Item";
