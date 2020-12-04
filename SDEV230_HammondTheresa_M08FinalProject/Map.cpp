@@ -23,7 +23,14 @@ Map::Map(int size, Player& player) { // CONSTRUCTOR (generates entire map!)
 
 	 // path branching time!
 	 cout << "CREATING BRANCHES... (" << iteration << ")" << endl;
-	 path_gen(current);
+	 // for each iteration (no. of iterations depends on size)
+	 while (iteration < size) {
+		 // repeat a given amount of times based on current iteration
+		 for (int i = 0; i < size + iteration; i++) {
+			 path_gen(current); // generate a path
+		 }
+		 iteration++; // go to next iteration
+	 }
 }
 
 void Map::path_start(Player& player, Room*& start, Room*& current) {
@@ -74,12 +81,12 @@ void Map::path_start(Player& player, Room*& start, Room*& current) {
 
 // generate a path branch! (from start to exit for main path, then small branches)
 bool Map::path_gen(Room*& current) {
-	int limit = size - iteration; // generate shorter paths the more branches there are
-	int room_count = 0; // count how many rooms have been generated (works with limit)
 	int x;
 	int y;
 	Room* next = nullptr;
 	int direction;
+	int limit = size - iteration; // generate shorter paths the more branches there are
+	int room_count = 0; // count how many rooms have been generated (works with limit)
 	vector<int> v_dirs = { 0, 1, 2, 3 }; // directional info (gets shuffled)
 	vector<int>::iterator dit = v_dirs.begin(); // iterator for directional vector 
 
@@ -89,14 +96,23 @@ bool Map::path_gen(Room*& current) {
 
 	// if generating a branch, find a random room of the previous iteration as a base
 	if (iteration > 0) {
+		int try_count = 0;
+
 		while (true) {
-			x = rand() % (size - 1); // column coordinate
-			y = rand() % (size - 1); // row coordinate
+			// cout << "SEARCHING..." << endl;
+			x = rand() % size; // column coordinate
+			y = rand() % size; // row coordinate
 			if (map[x][y]) { // if room exists
 				// room must be branched off of previous iteration and NOT exit
 				if ((map[x][y]->iteration == iteration - 1) && (!map[x][y]->is_exit)) {
 					current = map[x][y]; // set this room as base
 					break; // end loop
+				}
+				else {
+					try_count++;
+					if (try_count >= (size * 10)) { // can't find a room of previous iteration
+						return false; // quit; don't try any more branches
+					}
 				}
 			}
 		}
@@ -171,6 +187,7 @@ bool Map::path_gen(Room*& current) {
 			// if iterator is at end, exit the loop with an error message
 			if (dit == v_dirs.end()) {
 				cout << "ERROR. MAP CREATION FAILURE." << endl;
+				cout << "BRANCH ITERATIONS: " << iteration << endl;
 				// start map wipe procedure
 				return false; // quit path creation
 			}
@@ -178,6 +195,7 @@ bool Map::path_gen(Room*& current) {
 	}
 	// map did not find exit before reaching limit (DEBUG)
 	cout << "ERROR. PATH LENGTH LIMIT REACHED" << endl;
+	cout << "BRANCH ITERATIONS: " << iteration << endl;
 	return false;
 }
 

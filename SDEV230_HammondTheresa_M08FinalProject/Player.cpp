@@ -56,7 +56,7 @@ void Player::open_backpack() {
 				menu_choice = 0; // reset
 				action_exit = false;
 				while (!action_exit) { // only loop menu when examine/use chosen (everything else exits loop)
-					cout << "\nWhat will you do with the " << (*it)->get_name() << "?" << endl; // confirm item selection
+					cout << "\nWhat will you do with the " << (*it)->name << "?" << endl; // confirm item selection
 					cout << "1 . . . Examine" << endl; // (*it)->describe();, loop again
 					cout << "2 . . . Use" << endl; // (*it)->use();, if single-use item, go back to item list
 					cout << "3 . . . Drop" << endl; // (*it)->drop();, go back to item list
@@ -66,8 +66,8 @@ void Player::open_backpack() {
 					cin >> menu_choice;
 					switch (menu_choice) { // actions based on choice
 					case 1: // Examine
-						cout << "\n>> You examine the " << (*it)->get_name() << "." << endl;
-						cout << ">> [" << (*it)->get_name() << ": " << (*it)->get_desc() << "]" << endl;
+						cout << "\n>> You examine the " << (*it)->name << "." << endl;
+						cout << ">> [" << (*it)->name << ": " << (*it)->desc << "]" << endl;
 						break;
 					case 2: // Use
 						(*it)->use();
@@ -81,7 +81,7 @@ void Player::open_backpack() {
 						* } */
 						break;
 					case 3: // Drop
-						cout << "\n>> You drop the " << (*it)->get_name() << " on the floor." << endl;
+						cout << "\n>> You drop the " << (*it)->name << " on the floor." << endl;
 						item_list.push_back(*it); // push item to room item list instead (because it's now on the floor)
 						backpack.erase(it); // erase item reference from backpack
 						room->set_item_list(item_list); // update room list from player to room
@@ -96,7 +96,7 @@ void Player::open_backpack() {
 						action_exit = true;
 						break;
 					case 5: // Close backpack
-						cout << "\n>> You put the " << (*it)->get_name() << " back and close your backpack." << endl;
+						cout << "\n>> You put the " << (*it)->name  << " back and close your backpack." << endl;
 						action_exit = true;
 						break;
 					default:
