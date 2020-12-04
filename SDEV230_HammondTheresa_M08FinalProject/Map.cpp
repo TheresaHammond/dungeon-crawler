@@ -5,20 +5,31 @@ using namespace std;
 
 Map::Map(int size, Player& player) { // CONSTRUCTOR (generates entire map!)
 	cout << "\n>> Generating dungeon..." << endl;
-	int x;
-	int y;
 	this->size = size;
-	this->validate = false;
+	this->iteration = 0; // level of path gen (0 for main, ++ for each branch pass)
+	this->complete = false;
 	Room* start = nullptr;
 	Room* current = nullptr;
-	Room* next = nullptr;
-	bool exit = false;
-	bool finished = false;
-	int tries = 0;
-	int direction;
-	vector<int> v_dirs = { 0, 1, 2, 3 }; // directional info (gets shuffled)
-	vector<int>::iterator dit = dirs.begin(); // iterator for directional vector 
-	
+	vector<Door*>::iterator dsit = v_doors.begin(); // iterator for door list
+
+	path_start(player, start, current); // create entrance and exit
+
+	// main path creation loop (keep trying until successful)
+	 while (!complete) {
+		 if (path_gen(current)) // if path_gen completes successfully, exit while loop
+			 complete = true;
+		 else path_erase(start, current); // else delete main path and start over
+	}
+
+	 // path branching time!
+	 cout << "CREATING BRANCHES... (" << iteration << ")" << endl;
+	 path_gen(current);
+}
+
+void Map::path_start(Player& player, Room*& start, Room*& current) {
+	int x;
+	int y;
+
 	// generate a 2-dimensional square grid array using size parameter
 	map = new Room * *[size];
 	for (int i = 0; i < size; i++) {
@@ -33,7 +44,7 @@ Map::Map(int size, Player& player) { // CONSTRUCTOR (generates entire map!)
 	} while (((x != 0) && (x != size - 1)) && ((y != 0) && (y != size - 1)));
 
 	// create & initialize entrance room
-	map[x][y] = new Room(x, y);
+	map[x][y] = new Room(x, y, iteration);
 	start = map[x][y];
 	start->is_entrance = true;
 	start->map_icon = "[S]";
@@ -50,28 +61,56 @@ Map::Map(int size, Player& player) { // CONSTRUCTOR (generates entire map!)
 		// generate random int within grid params
 		x = rand() % size; // column coordinate
 		y = rand() % size; // row coordinate
-		if (((x != 0) && (x != size - 1)) && ((y != 0) && (y != size - 1)))
+		if (((x == 0) || (x == size - 1)) && ((y == 0) || (y == size - 1)))
 			if (!map[x][y]) break; // break loop if map space is empty (free)!
 	}
-	/* do { // generate random int within grid params
-		x = rand() % size; // column coordinate
-		y = rand() % size; // row coordinate
-		// do not allow entrance and exit to be in the same location! (this doesn't always work... fix it)
-	} while (((x != 0) && (x != size - 1)) && ((y != 0) && (y != size - 1)) && (map[x][y])); */
 
 	// create exit room
-	map[x][y] = new Room(x, y);
+	map[x][y] = new Room(x, y, iteration);
 	map[x][y]->is_exit = true;
 	map[x][y]->map_icon = "[E]";
 	cout << "EXIT: " << x << ", " << y << endl; // debug
+}
+
+// generate a path branch! (from start to exit for main path, then small branches)
+bool Map::path_gen(Room*& current) {
+	int limit = size - iteration; // generate shorter paths the more branches there are
+	int room_count = 0; // count how many rooms have been generated (works with limit)
+	int x;
+	int y;
+	Room* next = nullptr;
+	int direction;
+	vector<int> v_dirs = { 0, 1, 2, 3 }; // directional info (gets shuffled)
+	vector<int>::iterator dit = v_dirs.begin(); // iterator for directional vector 
 
 	// check for a room in a random direction (allows for more random directional movement)
 	// takes an array of ints 0-3 and shuffles them randomly for every room, then reads them all for search
 	direction = *(v_dirs.begin()); // get first element of dirs
 
+	// if generating a branch, find a random room of the previous iteration as a base
+	if (iteration > 0) {
+		while (true) {
+			x = rand() % (size - 1); // column coordinate
+			y = rand() % (size - 1); // row coordinate
+			if (map[x][y]) { // if room exists
+				// room must be branched off of previous iteration and NOT exit
+				if ((map[x][y]->iteration == iteration - 1) && (!map[x][y]->is_exit)) {
+					current = map[x][y]; // set this room as base
+					break; // end loop
+				}
+			}
+		}
+	}
+
 	// BEGIN PATH GENERATION LOOP
-	// while (!finished) {
-	for (int m = 0; m < 15; m++) {
+	while (true) {
+	// for (int m = 0; m < 3; m++) {
+
+		// limit length of branching paths (only generate a certain amount of rooms before exiting)
+		if (iteration > 0) { // must not be main path
+			if (room_count > limit) return true; // done with branch gen
+		}
+
 		// shuffle directions
 		random_shuffle(v_dirs.begin(), v_dirs.end());
 		// set iterator to first element of vector
@@ -87,25 +126,29 @@ Map::Map(int size, Player& player) { // CONSTRUCTOR (generates entire map!)
 
 		cout << "CURRENT ROOM: (" << x << ", " << y << ")" << endl; // DEBUG
 
-		// look for exit anywhere around current room; if true, break, path gen is finished
-		for (int d = 0; d < 4; d++) {
-			// returns true if room found
-			cout << "EXIT LOOK DIR: " << d << endl; // DEBUG
-			if (room_check(current, d, next)) {
-				if (next != nullptr) {
-					// if the room found is and exit, create a Big Door connection and quit map generation
-					if (next->is_exit) {
-						door_create(current, d, next);
-						cout << "EXIT FOUND AND CONNECTED. COMPLETE." << endl;
-						return;
+		// MAIN PATH ONLY (branches do not connect with exit!)
+		if (iteration == 0) {
+			// look for exit anywhere around current room; if true, main path gen is finished
+			for (int d = 0; d < 4; d++) {
+				// returns true if room found
+				cout << "EXIT LOOK DIR: " << d << endl; // DEBUG
+				if (room_check(current, d, next)) {
+					if (next != nullptr) {
+						// if the room found is and exit, create a Big Door connection and quit map generation
+						if (next->is_exit) {
+							door_create(current, d, next);
+							cout << "EXIT FOUND AND CONNECTED. COMPLETE." << endl;
+							iteration++; // main done; go to next pass of branches
+							return true;
+						}
+						else cout << "ROOM FOUND, BUT IS NOT EXIT." << endl; // DEBUG
 					}
-					else cout << "ROOM FOUND, BUT IS NOT EXIT." << endl; // DEBUG
+					else cout << "ROOM NOT FOUND. TRYING ANOTHER DIRECTION..." << endl;
 				}
-				else cout << "ROOM NOT FOUND. TRYING ANOTHER DIRECTION..." << endl;
-			} 
-			// out of bounds
+				// out of bounds
+			}
+			cout << "EXIT NOT FOUND. CONTINUING GENERATION..." << endl;
 		}
-		cout << "EXIT NOT FOUND. CONTINUING GENERATION..." << endl;
 
 		// loop for directional search. if first element can't create a room, move to next element until either found, or error
 		while ((dit != v_dirs.end()) || (!room_created)) {
@@ -117,8 +160,9 @@ Map::Map(int size, Player& player) { // CONSTRUCTOR (generates entire map!)
 			// check for room in direction
 			// if room_check is FALSE, then there is no room there... create one
 
-			if (room_create(current, direction, next)) {
+			if (room_create(current, direction, next, iteration)) {
 				room_created = true;
+				room_count++; // count number of rooms (used for branches)
 				break; // break inner while loop, go to next iteration in for loop
 			}
 			// if room already exists, increment direction iterator and try again
@@ -128,14 +172,48 @@ Map::Map(int size, Player& player) { // CONSTRUCTOR (generates entire map!)
 			if (dit == v_dirs.end()) {
 				cout << "ERROR. MAP CREATION FAILURE." << endl;
 				// start map wipe procedure
-				return; // quit map creation
+				return false; // quit path creation
 			}
 		}
 	}
+	// map did not find exit before reaching limit (DEBUG)
+	cout << "ERROR. PATH LENGTH LIMIT REACHED" << endl;
+	return false;
 }
 
+// main path deletion: if main path returns a failure, erase main path (all rooms and doors) and start over
+// rooms first, then delete from list of doors, because trying to get every door reference from each room was a pain
+void Map::path_erase(Room* start, Room*& current) {
+	cout << "ERASING PATH..." << endl;
+	for (int i = 0; i < size; i++) {
+		for (int j = 0; j < size; j++) {
+			if (map[i][j]) { // check if room exists at coordinates
+				if ((!map[i][j]->is_entrance) && (!map[i][j]->is_exit)) { // do NOT delete entrance or exit
+					delete map[i][j]; // delete room
+					map[i][j] = nullptr; // clean up dangling pointer
+				}
+			}
+		}
+	}
+	// iterate through door list and delete all doors
+	for (dsit = v_doors.begin(); dsit != v_doors.end(); ++dsit) {
+		delete* dsit; // remember that an iterator is also a pointer lol, so must dereference
+		*dsit = nullptr; // set to null
+	}
+	v_doors.clear(); // clear entire list
+
+	// reset all door pointers in starting room
+	for (int i = 0; i < 4; i++) {
+		start->a_doors[i] = nullptr;
+	}
+	// reset main path start
+	current = start;
+
+	cout << "PATH ERASED." << endl;
+}
+	
 // new room creation function for map gen
-bool Map::room_create(Room*& current, int direction, Room* next) {
+bool Map::room_create(Room*& current, int direction, Room* next, int iteration) {
 	int x = current->x;
 	int y = current->y;
 	// if check isn't out of bounds, and next room is empty, then create room!
@@ -157,7 +235,7 @@ bool Map::room_create(Room*& current, int direction, Room* next) {
 				break;
 			}
 			cout << "CREATING ROOM & MOVING TO: (" << x << ", " << y << ")" << endl;
-			map[x][y] = new Room(x, y); // create new room at target location
+			map[x][y] = new Room(x, y, iteration); // create new room at target location
 			door_create(current, direction, map[x][y]); // create door between current room and new room
 			current = map[x][y]; // move to new room
 			// cout << "CURRENT ROOM DOOR COUNT: " << room->door_count << endl;
@@ -195,9 +273,11 @@ void Map::door_create(Room* current, int direction, Room* next) {
 	if (next->is_exit) door = new BigDoor(current, next);
 	// else create regular door
 	else door = new Door(current, next);
-	current->a_doors[direction] = door; // place outgoing door in current room
+	// put doors of main path in door list (for deletion in case of main path failure)
+	if (iteration == 0) v_doors.push_back(door);
+	current->a_doors[direction] = door; // place pointer to outgoing door in current room
 	current->door_count++;
-	next->a_doors[indir] = door; // place incoming door in opposite area of other room
+	next->a_doors[indir] = door; // place pointer to incoming door in opposite area of other room
 	next->door_count++;
 	door = nullptr; // no dangling pointers
 }

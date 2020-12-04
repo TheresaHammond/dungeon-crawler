@@ -1,9 +1,10 @@
 #pragma once
 #include "Entity.h"
-#include "Item.h"
-#include "Room.h"
+
 #include <iostream>
 #include <string>
+
+class Room;
 
 class Player :public Entity {
 	friend class Map;

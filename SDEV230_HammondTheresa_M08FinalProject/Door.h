@@ -17,6 +17,7 @@ protected:
 public:
 	Door(void); // default
 	Door(Room* current, Room* next); // constructor
+	~Door(void); // destructor
 	void use();
 	void kick();
 	void status();

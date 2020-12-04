@@ -1,6 +1,5 @@
 #include "Room.h"
-#include "Door.h"
-#include "Item.h"
+
 #include <iostream>
 #include <string>
 #include <list>
@@ -10,10 +9,12 @@ using namespace std;
 Room::Room(void) { // CONSTRUCTOR
 	cout << "Wrong room constructor!" << endl;
 }
-Room::Room(int i, int j) { // CONSTRUCTOR
-	cout << "Room created" << "(" << i << ", " << j << ")" << endl;
-	this->x = i;
-	this->y = j;
+Room::Room(int x, int y, int i) { // CONSTRUCTOR
+	cout << "Room created" << "(" << x << ", " << y << ")" << endl;
+	this->chest = nullptr;
+	this->x = x;
+	this->y = y;
+	this->iteration = i;
 	this->is_entrance = false;
 	this->is_exit = false;
 	this->visited = false;
@@ -24,10 +25,15 @@ Room::Room(int i, int j) { // CONSTRUCTOR
 	/* for (int i = 0; i < doors; i++) { // add door items to list of room items
 		item_list.push_front(new Door); // always in front
 	} */
-	for (int i = 0; i < 4; i++) {
-		a_doors[i] = 0; // initialize all pointers as null
+	for (int k = 0; k < 4; k++) {
+		a_doors[k] = 0; // initialize all pointers as null
 	}
 }
+
+Room::~Room(void) { // destructor
+	cout << "ROOM DELETED." << endl;
+}
+
 int Room::get_x() {
 	return x;
 }

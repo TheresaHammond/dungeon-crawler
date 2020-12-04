@@ -1,6 +1,7 @@
 #include "Player.h"
-#include "Item.h"
 #include "Room.h"
+
+
 #include <iostream>
 #include <string>
 
@@ -184,32 +185,68 @@ void Player::look() {
 	int choice = 0;
 	bool look_exit = false; // break condition for look menu
 	list<Item*> item_list = room->get_item_list(); // copy list of items in room
+	list<Item*>::iterator it = item_list.begin();
+	int list_count = 0; // pushes cancel option to end of list depending on doors & chest existence
 
 	while (look_exit == false) { // Keep looping through menu until exit condition reached!
 		cout << "\nLook at what?" << endl;
 		// first list room itself (first item in list is THIS room)
-		cout << "1 . . . Room" << endl;
 		// cout << "Items in room: " << item_list.size() << endl; // DEBUG
+
 		// then list items inside room's inventory
 		// ADD: only access this if have sufficient light
-		for (list<Item*>::iterator it = item_list.begin(); it != item_list.end(); ++it) { // add 2 to index to compensate for room and staring at 1
-			cout << ((distance(item_list.begin(), it)) + 2) << " . . . " << (*it)->get_name() << endl; // double dereference, yay
+		for (it = item_list.begin(); it != item_list.end(); ++it) { // add 2 to index to compensate for room and staring at 1
+			cout << ((distance(item_list.begin(), it)) + 1) << " . . . " << (*it)->get_name() << endl; // double dereference, yay
 		}
-		cout << (item_list.size() + 2) << " . . . Cancel" << endl; // show exit condition
+		cout << (item_list.size()) << " . . . Room" << endl; // look at the room itself
+		list_count = (item_list.size() + 1); // set list count start
+		// show doors (if they exist)
+		// iterate through a_doors and if any found, show them and their location and iterate list count
+		for (int i = 0; i < 4; i++) {
+			if (room->a_doors[i]) {
+				string dir;
+				switch (i) { // location of door
+				case 0:
+					dir = "North";
+					break;
+				case 1:
+					dir = "East";
+					break;
+				case 2:
+					dir = "South";
+					break;
+				case 3:
+					dir = "West";
+					break;
+				}
+				cout << (item_list.size() + list_count) << " . . . " << dir << " Door" << endl;
+				list_count++; // increment to push cancel option to end of list
+			}
+		}
+		if (room->chest) { // show chest (if it exists)
+			cout << (item_list.size() + list_count) << " . . . Chest" << endl;
+			list_count++;
+		}
+		cout << (item_list.size() + list_count) << " . . . Cancel" << endl; // show exit condition
 
 		cout << "Enter choice: "; // item choice prompt
 		cin >> choice; // get player input
 
-		if (choice == 1) { // current room selected
+		// auto-set to cancel if out of scope
+		if ((choice > (item_list.size() + list_count)) || (choice < 1)) choice = (item_list.size() + list_count);
+
+		// do stuff depending on what item was selected (oh my god this is a nightmare lol)
+		if (choice == item_list.size()) { // current room selected
 			room->describe();
 		}
-		else if (choice == (item_list.size() + 2)) { // if exit condition chosen
+		else if (choice == (item_list.size() + list_count)) { // exit condition selected
 			cout << "\n>> You decide to do something else." << endl; // nothing else happens; loops back to main menu
 			look_exit = true;
+			break;
 		}
-		else { // find item and then describe it
-			list<Item*>::iterator it = item_list.begin(); // reset iterator to select item
-			while (choice - 2 != (distance(item_list.begin(), it))) { // move iterator until it matches choice
+		else { // find item in list and then describe it
+			it = item_list.begin(); // reset iterator to select item
+			while ((choice - 1) != (distance(item_list.begin(), it))) { // move iterator until it matches choice
 				++it;
 			}
 			cout << "\n>> You look at the " << (*it)->get_name() << "." << endl;
