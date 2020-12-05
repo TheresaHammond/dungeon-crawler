@@ -17,7 +17,7 @@
 using namespace std;
 
 // GLOBAL VARS
-// bool debug = true; // debug flag
+bool debg = false; // debug flag
 
 // DEFINE FUNCTIONS
 // combat state!
@@ -147,7 +147,9 @@ int main(void)
 	// INITIALIZE RANDOM SEED
 	srand(time(NULL));
 
-	cout << "~~~~~ WELCOME TO GAME NAME ~~~~~" << endl;
+	// pregame setup
+	cout << "~~~~~ DUNGEON GAME ~~~~~" << endl;
+	cout << "\nYou have been trapped inside a dungeon and must find your way out. Good luck!" << endl;
 	cout << "\nSelect dungeon size: " << endl;
 	cout << "1 . . . Small" << endl;
 	cout << "2 . . . Medium" << endl;
@@ -157,45 +159,42 @@ int main(void)
 
 	switch (choice) {
 	case 2: // small
-		cout << "\n>> Medium dungeon selected.";
+		cout << "\n>> Medium dungeon selected." << endl;
 		map_size = 5;
 		break;
 	case 3: // large
-		cout << "\n>> Large dungeon selected.";
+		cout << "\n>> Large dungeon selected." << endl;
 		map_size = 6;
 		break;
 	default: // default to small
-		cout << "\n>> Small dungeon selected.";
+		cout << "\n>> Small dungeon selected." << endl;
 		map_size = 4;
 	}
 
-	// CREATE OBJS
-	// player obj
-	Player player;
-
-	// generate map and set player in starting room
-	Map map(map_size, player); 
-
-	// show map (DEBUG)
-	map.draw_full(player);
-
-	// pregame setup
-	cout << "~~~~~ GAME START ~~~~~" << endl;
-	cout << "\nYou have been trapped inside a dungeon and must find your way out. Good luck!" << endl;
-
-	// get player name and set up stats
-	cout << "\n>> You awaken in a strange new place." << endl;
+	// get player name
 	cout << "\nPlease enter your name: ";
 	cin >> name;
 	if (name == "") name = "Default Dan";
-	player.set_name(name);
-	cout << endl << "\n>> You are " << player.get_name() << ". Your starting stats are:" << endl;
-	player.get_stats();
+	cout << "\n>> You are " << name << "." << endl;
+
+	// CREATE OBJS
+	// player obj
+	Player player(name);
+
+	// generate map and set player in starting room
+	Map map(map_size, player, debg);
+
+	// show map (DEBUG)
+	if (debg) map.draw_full(player);
+
+	cout << "\n>> You awaken in a strange new place." << endl;
 
 	// describe starting room
 	(player.get_room())->describe();
 	// set starting room as visited (set after so it describes as new)
 	(player.get_room())->set_visited();
+
+	// "What will you do next?"
 
 	// MAIN GAME LOOP
 	while (!game_end) { // until game_end is True

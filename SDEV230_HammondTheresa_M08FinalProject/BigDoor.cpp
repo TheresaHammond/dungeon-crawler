@@ -1,11 +1,11 @@
 #include "BigDoor.h"
 
 BigDoor::BigDoor(void) { // def con
-	cout << "Default big door constructor!" << endl;
+	// cout << "Default big door constructor!" << endl;
 }
 
 BigDoor::BigDoor(Room* current, Room* next) { // constructor!
-	cout << "New boss door constructed!" << endl;
+	// cout << "New boss door constructed!" << endl;
 	for (int i = 0; i < 2; i++) {
 		a_rooms[i] = 0; // initialize all pointers as null
 	}

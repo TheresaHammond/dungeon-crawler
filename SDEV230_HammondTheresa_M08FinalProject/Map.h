@@ -17,9 +17,10 @@ private:
 	bool complete; // whether map gen has finished successfully or not
 	vector<Door*> v_doors;
 	vector<Door*>::iterator dsit;
+	bool debg; // debug flag
 public:
 	Map(void); // default
-	Map(int size, Player& player); // constructor
+	Map(int size, Player& player, bool debg); // constructor
 	void draw_full(Player& player); // draw full map
 	// void draw_player(Player& player); // draw map from player's perspective
 	void path_start(Player& player, Room*& start, Room*& current); // creates map entrance and exit;
