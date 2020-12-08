@@ -7,10 +7,10 @@
 using namespace std;
 
 Room::Room(void) { // CONSTRUCTOR
-	cout << "Wrong room constructor!" << endl;
+	// cout << "Wrong room constructor!" << endl;
 }
 Room::Room(int x, int y, int i) { // CONSTRUCTOR
-	cout << "Room created" << "(" << x << ", " << y << ")" << endl;
+	// cout << "Room created" << "(" << x << ", " << y << ")" << endl;
 	this->chest = nullptr;
 	this->x = x;
 	this->y = y;
@@ -31,7 +31,7 @@ Room::Room(int x, int y, int i) { // CONSTRUCTOR
 }
 
 Room::~Room(void) { // destructor
-	cout << "ROOM DELETED." << endl;
+	// cout << "ROOM DELETED." << endl;
 }
 
 int Room::get_x() {

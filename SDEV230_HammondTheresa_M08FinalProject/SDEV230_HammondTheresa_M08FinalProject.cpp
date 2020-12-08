@@ -17,7 +17,7 @@
 using namespace std;
 
 // GLOBAL VARS
-// bool debug = true; // debug flag
+bool debg = false; // debug flag
 
 // DEFINE FUNCTIONS
 // combat state!
@@ -95,24 +95,34 @@ bool state_main(Player& player, Map& map) { // PASS OBJS BY REFERENCE!!!!!!!
 		return true; // game is over, you're dead
 	}
 	else { */
-	cout << "DEBUG: You are in room (" << (player.get_room())->get_x() << ", " << (player.get_room())->get_y() << ")" << endl;
+		if (debg) cout << "You are in room (" << (player.get_room())->get_x() << ", " << (player.get_room())->get_y() << ")" << endl;
 		cout << "\nWhat will you do next?" << endl;
-		cout << "1 . . . Look" << endl; // 
+		cout << "1 . . . Examine" << endl; // 
 		cout << "2 . . . Move" << endl;
 		cout << "3 . . . Open backpack" << endl;
 		cout << "4 . . . Check map" << endl;
 		cout << "5 . . . Check stats" << endl; 
 		cout << "Enter choice: ";
-		cin >> choice;
+		while (!(cin >> choice)) {
+			cout << "\n>> Whoops! Try again." << endl;
+			cin.clear();
+			cin.ignore(10000, '\n');
+			cout << "Enter choice: ";
+		}
+		cin.clear(); // clear input buffer
+		cin.ignore(10000, '\n');
 
 		switch (choice) { // actions based on choice
 		case 1: // Look
-			player.look();
+			player.examine();
 			return false; // break loop, loop again
 		case 2: // Move
-			// cout << "\nNot yet implemented." << endl;
-			player.move();
-			return false;
+			if (player.move()) {
+				// flag and quit game when player enters exit room! (temp)
+				cout << "\n>> You have reached the exit." << endl;
+				return true; // break loop and end game
+			}
+			else return false;
 		case 3: // Open backpack
 			cout << "\n>> You open your backpack." << endl;
 			player.open_backpack(); // open the inventory (list of items)
@@ -147,55 +157,61 @@ int main(void)
 	// INITIALIZE RANDOM SEED
 	srand(time(NULL));
 
-	cout << "~~~~~ WELCOME TO GAME NAME ~~~~~" << endl;
+	// pregame setup
+	cout << "~~~~~ DUNGEON EXPLORER GAME (ALPHA) ~~~~~" << endl;
+	cout << "\nYou have been trapped inside a dungeon and must find your way out. Good luck!" << endl;
 	cout << "\nSelect dungeon size: " << endl;
 	cout << "1 . . . Small" << endl;
 	cout << "2 . . . Medium" << endl;
 	cout << "3 . . . Large" << endl;
 	cout << "Enter choice: ";
-	cin >> choice;
+	while (!(cin >> choice)) {
+		cout << "\n>> Whoops! Try again." << endl;
+		cin.clear();
+		cin.ignore(10000, '\n');
+		cout << "Enter choice: ";
+	}
+	cin.clear(); // clear input buffer
+	cin.ignore(10000, '\n');
 
 	switch (choice) {
 	case 2: // small
-		cout << "\n>> Medium dungeon selected.";
+		cout << "\n>> Medium dungeon selected." << endl;
 		map_size = 5;
 		break;
 	case 3: // large
-		cout << "\n>> Large dungeon selected.";
+		cout << "\n>> Large dungeon selected." << endl;
 		map_size = 6;
 		break;
 	default: // default to small
-		cout << "\n>> Small dungeon selected.";
+		cout << "\n>> Small dungeon selected." << endl;
 		map_size = 4;
 	}
 
-	// CREATE OBJS
-	// player obj
-	Player player;
-
-	// generate map and set player in starting room
-	Map map(map_size, player); 
-
-	// show map (DEBUG)
-	map.draw_full(player);
-
-	// pregame setup
-	cout << "~~~~~ GAME START ~~~~~" << endl;
-	cout << "\nYou have been trapped inside a dungeon and must find your way out. Good luck!" << endl;
-
-	// get player name and set up stats
-	cout << "\n>> You awaken in a strange new place." << endl;
+	// get player name
 	cout << "\nPlease enter your name: ";
 	cin >> name;
 	if (name == "") name = "Default Dan";
-	player.set_name(name);
-	cout << endl << "\n>> You are " << player.get_name() << ". Your starting stats are:" << endl;
-	player.get_stats();
+	cout << "\n>> You are " << name << "." << endl;
+
+	// CREATE OBJS
+	// player obj
+	Player player(name);
+
+	// generate map and set player in starting room
+	Map map(map_size, player, debg);
+
+	// show map (DEBUG)
+	if (debg) map.draw_full(player);
+
+	cout << "\n>> You awaken in a strange new place." << endl;
 
 	// describe starting room
 	(player.get_room())->describe();
 	// set starting room as visited (set after so it describes as new)
 	(player.get_room())->set_visited();
+
+	// "What will you do next?"
 
 	// MAIN GAME LOOP
 	while (!game_end) { // until game_end is True

@@ -1,10 +1,12 @@
 #include "Map.h"
+#include "HealthPotion.h"
 #include <algorithm> // for random_shuffle()
 
 using namespace std;
 
-Map::Map(int size, Player& player) { // CONSTRUCTOR (generates entire map!)
+Map::Map(int size, Player& player, bool debg) { // CONSTRUCTOR (generates entire map!)
 	cout << "\n>> Generating dungeon..." << endl;
+	this->debg = debg;
 	this->size = size;
 	this->iteration = 0; // level of path gen (0 for main, ++ for each branch pass)
 	this->complete = false;
@@ -22,7 +24,7 @@ Map::Map(int size, Player& player) { // CONSTRUCTOR (generates entire map!)
 	}
 
 	 // path branching time!
-	 cout << "CREATING BRANCHES... (" << iteration << ")" << endl;
+	 if (debg) cout << "CREATING BRANCHES... (" << iteration << ")" << endl;
 	 // for each iteration (no. of iterations depends on size)
 	 while (iteration < size) {
 		 // repeat a given amount of times based on current iteration
@@ -31,6 +33,18 @@ Map::Map(int size, Player& player) { // CONSTRUCTOR (generates entire map!)
 		 }
 		 iteration++; // go to next iteration
 	 }
+
+	 // seed chests at dead ends of map (may sometimes include starting room)
+	 if (debg) cout << "SEEDING CHESTS..." << endl;
+	 seed_chests();
+
+	 // drop an item on the floor in the starting room (for testing)
+	 if (debg) cout << "DROPPING STARTING ITEM..." << endl;
+	 Item* potion = new HealthPotion;
+	 start->item_list.push_back(potion);
+	 potion = nullptr;
+
+	 cout << ">> Dungeon generation complete!" << endl;
 }
 
 void Map::path_start(Player& player, Room*& start, Room*& current) {
@@ -55,7 +69,7 @@ void Map::path_start(Player& player, Room*& start, Room*& current) {
 	start = map[x][y];
 	start->is_entrance = true;
 	start->map_icon = "[S]";
-	cout << "ENTRANCE: " << x << ", " << y << endl; // debug
+	if (debg) cout << "ENTRANCE: " << x << ", " << y << endl; // debug
 
 	// put player in entrance room
 	player.room = start;
@@ -76,7 +90,7 @@ void Map::path_start(Player& player, Room*& start, Room*& current) {
 	map[x][y] = new Room(x, y, iteration);
 	map[x][y]->is_exit = true;
 	map[x][y]->map_icon = "[E]";
-	cout << "EXIT: " << x << ", " << y << endl; // debug
+	if (debg) cout << "EXIT: " << x << ", " << y << endl; // debug
 }
 
 // generate a path branch! (from start to exit for main path, then small branches)
@@ -140,30 +154,30 @@ bool Map::path_gen(Room*& current) {
 		// reset flag for successful room creation
 		bool room_created = false;
 
-		cout << "CURRENT ROOM: (" << x << ", " << y << ")" << endl; // DEBUG
+		if (debg) cout << "CURRENT ROOM: (" << x << ", " << y << ")" << endl; // DEBUG
 
 		// MAIN PATH ONLY (branches do not connect with exit!)
 		if (iteration == 0) {
 			// look for exit anywhere around current room; if true, main path gen is finished
 			for (int d = 0; d < 4; d++) {
 				// returns true if room found
-				cout << "EXIT LOOK DIR: " << d << endl; // DEBUG
+				if (debg) cout << "EXIT LOOK DIR: " << d << endl; // DEBUG
 				if (room_check(current, d, next)) {
 					if (next != nullptr) {
 						// if the room found is and exit, create a Big Door connection and quit map generation
 						if (next->is_exit) {
 							door_create(current, d, next);
-							cout << "EXIT FOUND AND CONNECTED. COMPLETE." << endl;
+							if (debg) cout << "EXIT FOUND AND CONNECTED. COMPLETE." << endl;
 							iteration++; // main done; go to next pass of branches
 							return true;
 						}
-						else cout << "ROOM FOUND, BUT IS NOT EXIT." << endl; // DEBUG
+						else if (debg) cout << "ROOM FOUND, BUT IS NOT EXIT." << endl; // DEBUG
 					}
-					else cout << "ROOM NOT FOUND. TRYING ANOTHER DIRECTION..." << endl;
+					else if (debg) cout << "ROOM NOT FOUND. TRYING ANOTHER DIRECTION..." << endl;
 				}
 				// out of bounds
 			}
-			cout << "EXIT NOT FOUND. CONTINUING GENERATION..." << endl;
+			if (debg) cout << "EXIT NOT FOUND. CONTINUING GENERATION..." << endl;
 		}
 
 		// loop for directional search. if first element can't create a room, move to next element until either found, or error
@@ -171,7 +185,7 @@ bool Map::path_gen(Room*& current) {
 			// get vector element at current iterator location
 			direction = *dit;
 
-			cout << "LOOK DIR: " << direction << endl; // debug
+			if (debg) cout << "LOOK DIR: " << direction << endl; // debug
 
 			// check for room in direction
 			// if room_check is FALSE, then there is no room there... create one
@@ -186,23 +200,23 @@ bool Map::path_gen(Room*& current) {
 
 			// if iterator is at end, exit the loop with an error message
 			if (dit == v_dirs.end()) {
-				cout << "ERROR. MAP CREATION FAILURE." << endl;
-				cout << "BRANCH ITERATIONS: " << iteration << endl;
+				if (debg) cout << "ERROR. MAP CREATION FAILURE." << endl;
+				if (debg) cout << "BRANCH ITERATIONS: " << iteration << endl;
 				// start map wipe procedure
 				return false; // quit path creation
 			}
 		}
 	}
 	// map did not find exit before reaching limit (DEBUG)
-	cout << "ERROR. PATH LENGTH LIMIT REACHED" << endl;
-	cout << "BRANCH ITERATIONS: " << iteration << endl;
+	if (debg) cout << "ERROR. PATH LENGTH LIMIT REACHED" << endl;
+	if (debg) cout << "BRANCH ITERATIONS: " << iteration << endl;
 	return false;
 }
 
 // main path deletion: if main path returns a failure, erase main path (all rooms and doors) and start over
 // rooms first, then delete from list of doors, because trying to get every door reference from each room was a pain
 void Map::path_erase(Room* start, Room*& current) {
-	cout << "ERASING PATH..." << endl;
+	if (debg) cout << "ERASING PATH..." << endl;
 	for (int i = 0; i < size; i++) {
 		for (int j = 0; j < size; j++) {
 			if (map[i][j]) { // check if room exists at coordinates
@@ -227,7 +241,10 @@ void Map::path_erase(Room* start, Room*& current) {
 	// reset main path start
 	current = start;
 
-	cout << "PATH ERASED." << endl;
+	// reset door count for start
+	start->door_count = 0;
+
+	if (debg) cout << "PATH ERASED." << endl;
 }
 	
 // new room creation function for map gen
@@ -252,7 +269,7 @@ bool Map::room_create(Room*& current, int direction, Room* next, int iteration) 
 				y = y - 1;
 				break;
 			}
-			cout << "CREATING ROOM & MOVING TO: (" << x << ", " << y << ")" << endl;
+			if (debg) cout << "CREATING ROOM & MOVING TO: (" << x << ", " << y << ")" << endl;
 			map[x][y] = new Room(x, y, iteration); // create new room at target location
 			door_create(current, direction, map[x][y]); // create door between current room and new room
 			current = map[x][y]; // move to new room
@@ -260,12 +277,12 @@ bool Map::room_create(Room*& current, int direction, Room* next, int iteration) 
 			return true;
 		}
 		else {
-			cout << "ROOM ALREADY EXISTS." << endl;
+			if (debg) cout << "ROOM ALREADY EXISTS." << endl;
 			return false;
 		}
 	}
 	else {
-		cout << "CANNOT CREATE ROOM." << endl;
+		if (debg) cout << "CANNOT CREATE ROOM." << endl;
 		return false;
 	}
 }
@@ -290,7 +307,10 @@ void Map::door_create(Room* current, int direction, Room* next) {
 	// if the other room is the exit, create a Big Door
 	if (next->is_exit) door = new BigDoor(current, next);
 	// else create regular door
-	else door = new Door(current, next);
+	else {
+		door = new Door(current, next);
+		cout << "CREATING DOOR FROM (" << current->x << ", " << current->y << ") to (" << next->x << ", " << next->y << ")..." << endl;
+	}
 	// put doors of main path in door list (for deletion in case of main path failure)
 	if (iteration == 0) v_doors.push_back(door);
 	current->a_doors[direction] = door; // place pointer to outgoing door in current room
@@ -309,7 +329,7 @@ bool Map::room_check(Room* current, int direction, Room*& next) {
 	switch (direction) {
 		case 0: // check north
 			if (x - 1 < 0) {
-				cout << "OUT OF BOUNDS." << endl;
+				if (debg) cout << "OUT OF BOUNDS." << endl;
 				return false;
 			}
 			else if (map[x - 1][y]) { // north room exists
@@ -318,7 +338,7 @@ bool Map::room_check(Room* current, int direction, Room*& next) {
 			return true; // return that area is not out of bounds?
 		case 1: // check east
 			if (y + 1 >= size) {
-				cout << "OUT OF BOUNDS." << endl;
+				if (debg) cout << "OUT OF BOUNDS." << endl;
 				return false;
 			}
 			else if (map[x][y + 1]) { // east
@@ -327,7 +347,7 @@ bool Map::room_check(Room* current, int direction, Room*& next) {
 			return true;
 		case 2: // check south
 			if (x + 1 >= size) {
-				cout << "OUT OF BOUNDS." << endl;
+				if (debg) cout << "OUT OF BOUNDS." << endl;
 				return false;
 			}
 			else if (map[x + 1][y]) { // south
@@ -336,7 +356,7 @@ bool Map::room_check(Room* current, int direction, Room*& next) {
 			return true;
 		case 3: // check south
 			if (y - 1 < 0) {
-				cout << "OUT OF BOUNDS." << endl;
+				if (debg) cout << "OUT OF BOUNDS." << endl;
 				return false;
 			}
 			else if (map[x][y - 1]) { // west
@@ -442,3 +462,17 @@ void Map::draw_player(Player& player) {
 	cout << "[S] - Starting room" << endl;
 	cout << "[E] - Exit" << endl;
 } */
+
+void Map::seed_chests(void) {
+	// put a chest in each room with only one door
+	for (int i = 0; i < size; i++) {
+		for (int j = 0; j < size; j++) {
+			if (map[i][j]) {
+				if (map[i][j]->door_count == 1) {
+					map[i][j]->chest = new Chest;
+					if (debg) cout << "CHEST CREATED IN (" << i << ", " << j << ")" << endl;
+				}
+			}
+		}
+	}
+}

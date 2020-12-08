@@ -62,7 +62,7 @@ void Chest::use(Player& player) { // interaction between player and chest
 }
 
 void Chest::status() {
-	if (locked) cout << ">> The " << name << " is locked." << endl;
-	else if (!open) cout << ">> The " << name << " is closed." << endl;
-	else cout << ">> The " << name << " is open." << endl;
+	if (locked) cout << "\n>> The " << name << " is locked." << endl;
+	else if (!open) cout << "\n>> The " << name << " is closed." << endl;
+	else cout << "\n>> The " << name << " is open." << endl;
 }

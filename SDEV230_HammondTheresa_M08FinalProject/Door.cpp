@@ -9,7 +9,7 @@ Door::Door(void) { // def con
 }
 
 Door::Door(Room* current, Room* next) { // constructor!
-	cout << "New door constructed!" << endl;
+	// cout << "New door constructed!" << endl;
 	for (int i = 0; i < 2; i++) {
 		a_rooms[i] = 0; // initialize all pointers as null
 	}
@@ -25,17 +25,17 @@ Door::Door(Room* current, Room* next) { // constructor!
 }
 
 Door::~Door(void) { // destructor
-	cout << "DOOR DELETED." << endl;
+	// cout << "DOOR DELETED." << endl;
 }
 
 void Door::status() {
 	if (!open && !locked) { // closed and unlocked
-		cout << ">> The " << this->get_name() << " is closed." << endl;
+		cout << "\n>> The " << this->get_name() << " is closed." << endl;
 	}
 	else if (!locked) { // already open
-		cout << ">> The " << this->get_name() << " is open." << endl;
+		cout << "\n>> The " << this->get_name() << " is open." << endl;
 	} // is locked (and closed)
-	else cout << ">>The " << this->get_name() << " is locked." << endl;
+	else cout << "\n>>The " << this->get_name() << " is locked." << endl;
 }
 
 void Door::use() {
