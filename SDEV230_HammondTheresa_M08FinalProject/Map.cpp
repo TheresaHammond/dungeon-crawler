@@ -309,7 +309,7 @@ void Map::door_create(Room* current, int direction, Room* next) {
 	// else create regular door
 	else {
 		door = new Door(current, next);
-		cout << "CREATING DOOR FROM (" << current->x << ", " << current->y << ") to (" << next->x << ", " << next->y << ")..." << endl;
+		if (debg) cout << "CREATING DOOR FROM (" << current->x << ", " << current->y << ") to (" << next->x << ", " << next->y << ")..." << endl;
 	}
 	// put doors of main path in door list (for deletion in case of main path failure)
 	if (iteration == 0) v_doors.push_back(door);
