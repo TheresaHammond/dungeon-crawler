@@ -17,8 +17,9 @@ public:
 	Player(std::string name);
 	void addto_backpack(Item* item);
 	void open_backpack();
-	void look();
-	void move();
+	void examine();
+	bool move();
+	bool interact(Item* item, int index);
 };
 
 

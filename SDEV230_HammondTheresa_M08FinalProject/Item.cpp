@@ -33,10 +33,14 @@ void Item::status() { // shows more information about this thing (using look fun
 	cout << ">> Nothing else to report about this." << endl;
 }
 void Item::use() { // apply item effect (yay runtime polymorphism!) (virtual)
-	cout << "\n>> You use the " << this->get_name() << "." << endl;
+	cout << "\n>> You use the " << name << "." << endl;
 	cout << ">> Nothing happened." << endl;
 }
 void Item::kick() { // fun stuff (virtual)
 	cout << ">> Nothing happened." << endl;
+}
+
+void Item::describe() {
+	cout << "\n>> [" << name << "]: " << desc << endl;
 }
 

@@ -23,4 +23,5 @@ public:
 	virtual void status();
 	virtual void use();
 	virtual void kick();
+	void describe();
 };

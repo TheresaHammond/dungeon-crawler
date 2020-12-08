@@ -29,4 +29,5 @@ public:
 	void door_create(Room* current, int direction, Room* next); // creates a door & places pointer to door in each connecting room
 	bool room_create(Room*& current, int direction, Room* next, int iteration); // creates new room in a random direction based on current room's location
 	bool room_check(Room* current, int direction, Room*& next); // checks for a room in a given direction
+	void seed_chests(void); // create chests and put them in rooms
 };

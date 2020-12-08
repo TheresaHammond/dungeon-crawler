@@ -30,12 +30,12 @@ Door::~Door(void) { // destructor
 
 void Door::status() {
 	if (!open && !locked) { // closed and unlocked
-		cout << ">> The " << this->get_name() << " is closed." << endl;
+		cout << "\n>> The " << this->get_name() << " is closed." << endl;
 	}
 	else if (!locked) { // already open
-		cout << ">> The " << this->get_name() << " is open." << endl;
+		cout << "\n>> The " << this->get_name() << " is open." << endl;
 	} // is locked (and closed)
-	else cout << ">>The " << this->get_name() << " is locked." << endl;
+	else cout << "\n>>The " << this->get_name() << " is locked." << endl;
 }
 
 void Door::use() {
