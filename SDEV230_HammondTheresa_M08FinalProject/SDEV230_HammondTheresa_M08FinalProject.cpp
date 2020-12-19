@@ -1,6 +1,17 @@
 // SDEV230_HammondTheresa_M08FinalProject.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
+/* Menu structure:
+MAIN
+	- EXAMINE
+		- INTERACT
+			- USE 
+	MOVE
+		- LOCATION
+
+
+*/
+
 #include <iostream>
 #include <string>
 #include <time.h>

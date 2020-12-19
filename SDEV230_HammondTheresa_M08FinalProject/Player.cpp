@@ -137,7 +137,7 @@ void Player::open_backpack() {
 	}
 }
 
-bool Player::move() {
+bool Player::move() { // this code is used by the MOVE option (main menu)
 	cout << "\nMove where?" << endl;
 
 	string dir;
@@ -221,6 +221,22 @@ bool Player::move() {
 	}
 }
 
+bool Player::move2(Door& door) { // this code is used by the INTERACT menu when using doors
+	for (int j = 0; j < 2; j++) {
+		if (door.a_rooms[j] != room) {
+			cout << "\n>> You move through the door." << endl;
+			room = door.a_rooms[j]; // move player to that room
+			room->describe(); // tell us about the new room
+			if (room->visited) cout << "\n>> You have been here before." << endl;
+			if (!room->visited) room->visited = true; // mark room as visited if it hasn't been
+			move_count++;
+			if (room->is_exit) return true; // return true only if player's is now in exit
+			else return false;
+			// potential combat activation here???
+		}
+	}
+}
+
 // INTERACT WITH ITEMS IN ROOM
 void Player::examine() {
 	int choice = 0;
@@ -228,7 +244,7 @@ void Player::examine() {
 	list<Item*>::iterator it = room->item_list.begin();
 	int list_count = 0; // pushes cancel option to end of list depending on doors & chest existence
 
-	while (!look_exit) { // Keep looping through menu until exit condition reached!
+	while (!look_exit) { // keep looping while look_exit is false
 		cout << "\nExamine what?" << endl;
 		// first list room itself (first item in list is THIS room)
 		// cout << "Items in room: " << item_list.size() << endl; // DEBUG
@@ -306,7 +322,8 @@ void Player::examine() {
 					if (counter == 0) {
 						room->a_doors[d]->describe(); // show info about door
 						room->a_doors[d]->status(); 
-						continue;
+						look_exit = interact(room->a_doors[d], 0); // start interaction menu
+						break; // break for loop
 					}
 					else counter--; // decrement counter			
 			}
@@ -357,13 +374,17 @@ bool Player::interact(Item* item, int index) { // index used for take command (i
 		switch (choice) { // actions based on choice
 		case 1: // Use
 			cout << "\n>> You decide to use the " << item->name << "." << endl;
-			item->use(*this);
-			// if single-use, delete item from list
-			// item_list.erase(it);
-			// update room list
-			// room.set_item_list(item_list);
-			if (item->multiuse) continue; // loop INTERACT menu again (item can be used more than once)
-			else return true; // leave function entirely and go back to MAIN menu
+			// TRUE goes back to MAIN
+			// FALSE loops again through INTERACT
+\
+			switch (item->use(*this)) {
+			case 0: // loop INTERACT again
+				continue;
+			case 1: // go back to EXAMINE
+				return false;
+			case 2: // go back to MAIN
+				return true;
+			}
 		case 2: // Take
 			if (item->takeable == true) {
 				cout << "\n>> You add the " << item->name << " to your backpack." << endl;
@@ -373,7 +394,7 @@ bool Player::interact(Item* item, int index) { // index used for take command (i
 					++it;
 				}
 				room->item_list.erase(it); // delete item pointer from room list
-				return true; // go back to MAIN menu (not look menu)
+				return true; // go back to MAIN menu (not EXAMINE menu)
 			}
 			else cout << "\n>> You try to take the " << item->name << ", but it won't budge." << endl;
 			continue; // loop this menu again

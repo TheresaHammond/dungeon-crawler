@@ -20,7 +20,7 @@ public:
 	bool equippable;
 	Item(void);
 	virtual void status();
-	virtual void use(Player& player);
+	virtual int use(Player& player);
 	virtual void kick();
 	void describe();
 };

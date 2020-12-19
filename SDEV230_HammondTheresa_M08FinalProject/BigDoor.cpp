@@ -15,12 +15,11 @@ BigDoor::BigDoor(Room* current, Room* next) { // constructor!
 		a_rooms[i] = 0; // initialize all pointers as null
 	}
 	this->open = false; // boss door always closed & locked by default
-	this->locked = false; // should be true later on when keys are implemented!
+	this->locked = true;
 	this->name = "Big Door";
 	this->desc = "A massive, gilded door. Requires an equally massive key.";
 	list<string> locations{ "" }; // leave blank for now
 	this->location = "nearby";
-	this->takeable = false;
 	this->a_rooms[0] = current; // insert connecting rooms to door ref
 	this->a_rooms[1] = next;
 }

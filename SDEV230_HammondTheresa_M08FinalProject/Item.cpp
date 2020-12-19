@@ -26,9 +26,10 @@ void Item::status() { // shows more information about this thing (using look fun
 	cout << ">> Nothing else to report about this." << endl;
 }
 
-void Item::use(Player& player) { // apply item effect (yay runtime polymorphism!) (virtual)
+int Item::use(Player& player) { // apply item effect (yay runtime polymorphism!) (virtual)
 	cout << "\n>> You use the " << name << "." << endl;
 	cout << ">> Nothing happened." << endl;
+	return 0; // loop through INTERACT again
 }
 
 void Item::kick() { // fun stuff (virtual)

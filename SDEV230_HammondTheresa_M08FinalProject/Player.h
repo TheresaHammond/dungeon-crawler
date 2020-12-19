@@ -6,6 +6,7 @@
 #include <list>
 
 class Room;
+class Door;
 
 class Player :public Entity {
 	friend class Map;
@@ -25,6 +26,7 @@ public:
 	void open_backpack();
 	void examine();
 	bool move();
+	bool move2(Door& door);
 	bool interact(Item* item, int index);
 };
 

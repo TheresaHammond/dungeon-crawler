@@ -12,8 +12,8 @@ protected:
 	bool locked;
 public:
 	Openable(void);
-	void use(Player& player);
+	int use(Player& player);
 	void status();
-	virtual bool open_action(Player& player);
+	virtual int open_action(Player& player);
 };
 
