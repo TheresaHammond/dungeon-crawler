@@ -13,7 +13,7 @@ Player::Player(string name) { // constructor
 	this->def = 5; // defense
 	this->intel = 5; // intelligence
 	this->move_count = 0; // number of times player has changed rooms
-	this->keyring = 0; // number of keys player currently has
+	this->keyring = 1; // number of keys player currently has
 	this->bigkey = false; // whether player has big key
 }
 
@@ -288,13 +288,15 @@ void Player::examine() {
 		// cancel if option chosen, or choice out of scope
 		if ((choice >= (room->item_list.size() + list_count)) || (choice < 1)) {
 			cout << "\n>> You decide to do something else." << endl; // nothing else happens; loops back to main menu
-			look_exit = true;
 			break;
+			//look_exit = true;
+			//continue;
 		}
 
 		// if cancel not chosen, do stuff depending on what item was selected (oh my god this is a nightmare lol)
 		if (choice == 1) { // current room selected
 			room->describe();
+			// stay inside loop
 		}
 		else if ((choice >= 2) && (choice <= room->door_count + 1)) { // choice is a door, show status of that door
 			// find the correct door using math lol
@@ -302,16 +304,19 @@ void Player::examine() {
 			for (int d = 0; d < 4; d++) { // iterate through possible doors in room
 				if (room->a_doors[d]) // if door exists
 					if (counter == 0) {
-						room->a_doors[d]->status(); // show status of door
-						break;
+						room->a_doors[d]->describe(); // show info about door
+						room->a_doors[d]->status(); 
+						continue;
 					}
 					else counter--; // decrement counter			
 			}
 		}
 		else if (choice >= room->door_count + 2) { // choice is a chest (if it exists)
 			if ((room->chest) && (choice == room->door_count + 2)) {
-				room->chest->status(); // give info about chest
-				interact(room->chest, 0); // activate chest interaction list
+				room->chest->describe(); // show info about chest
+				room->chest->status();
+				look_exit = interact(room->chest, 0); // start interaction menu
+				// interact returns true if we want to go straight back to the main menu
 				continue;
 			}
 			if (!room->item_list.empty()) { // choice is an item scattered in room
@@ -351,12 +356,14 @@ bool Player::interact(Item* item, int index) { // index used for take command (i
 
 		switch (choice) { // actions based on choice
 		case 1: // Use
+			cout << "\n>> You decide to use the " << item->name << "." << endl;
 			item->use(*this);
 			// if single-use, delete item from list
 			// item_list.erase(it);
 			// update room list
 			// room.set_item_list(item_list);
-			return true; // leave function entirely and go back to main menu
+			if (item->multiuse) continue; // loop INTERACT menu again (item can be used more than once)
+			else return true; // leave function entirely and go back to MAIN menu
 		case 2: // Take
 			if (item->takeable == true) {
 				cout << "\n>> You add the " << item->name << " to your backpack." << endl;
@@ -376,7 +383,7 @@ bool Player::interact(Item* item, int index) { // index used for take command (i
 			continue; // loop this menu again
 		case 4: // Pick something else
 			cout << "\n>> You decide to look at something else." << endl;
-			return false; // leave this function and go back to LOOK menu
+			return false; // leave this function and go back to EXAMINE menu
 		default: // Stop looking (also case 5)
 			cout << "\n>> You decide to do something else." << endl;
 			return true; // go back to MAIN menu

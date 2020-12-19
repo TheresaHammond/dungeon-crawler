@@ -22,9 +22,9 @@ void Chest::use(Player& player) { // interaction between player and chest
 
 	while (true) { // loop until player chooses to exit
 		if (locked) { // closed and locked, prompt to unlock it
-			cout << "\n>> The " << name << " is locked.";
+			cout << ">> The " << name << " is locked." << endl;
 			// if player has a key in their inventory, prompt them to use a key
-			if (player.keyring > 0) cout << "\nWould you like to use a key?";
+			if (player.keyring > 0) cout << "\nWould you like to use a key?" << endl;
 			cout << "1 . . . Yes" << endl;
 			cout << "2 . . . No" << endl;
 			cout << "Enter choice: ";
@@ -38,10 +38,10 @@ void Chest::use(Player& player) { // interaction between player and chest
 			cin.ignore(10000, '\n');
 
 			if (choice == 1) { // yes
-				cout << "\n>> You use a key to unlock the " << name << endl;
-				cout << ">> The key sticks in the lock and is no longer useable." << endl;
+				cout << "\n>> You use a key to unlock the " << name << "." << endl;
+				cout << ">> The key sticks in the lock and is no longer usable." << endl;
 				player.keyring--;
-				this->open = true; // open chest
+				this->locked = false; // unlock chest (should open automatically next)
 			}
 			else { // no
 				cout << "\n>> You decide not to use a key." << endl;
@@ -49,18 +49,18 @@ void Chest::use(Player& player) { // interaction between player and chest
 			}
 		}
 		if ((!open) && (!locked)) { // closed but not locked, will open
-			cout << "\n>> You open the " << name << "." << endl;
+			cout << ">> You open the " << name << "." << endl;
 			this->open = true;
 		}
 		if (open) { // should run immediately after opening the chest also
 			if (items.empty()) {
-				cout << "\n>> The " << name << " is empty." << endl;
+				cout << ">> The " << name << " is empty." << endl; // no nl bc pairs w/ other flavor text
 				break;
 			}
 
 			else { // list items inside
 				int choice = (items.size() + 1); // cancel by default
-				cout << "\nWhat will you take?" << endl;
+				cout << "\nThere are items inside. What will you take?" << endl;
 				for (it = items.begin(); it != items.end(); ++it) { // list items
 					cout << ((distance(items.begin(), it)) + 1) << " . . . " << (*it)->name << endl;
 				}
@@ -128,8 +128,8 @@ void Chest::use(Player& player) { // interaction between player and chest
 	}	
 }
 
-void Chest::status() {
-	if (locked) cout << "\n>> The " << name << " is locked." << endl;
-	else if (!open) cout << "\n>> The " << name << " is closed." << endl;
-	else cout << "\n>> The " << name << " is open." << endl;
+void Chest::status() { // no new line bc pairs with other flavor text
+	// if (locked) cout << ">> The " << name << " is locked." << endl;
+	if (!open) cout << ">> The " << name << " is closed." << endl;
+	else cout << ">> The " << name << " is open." << endl;
 }
