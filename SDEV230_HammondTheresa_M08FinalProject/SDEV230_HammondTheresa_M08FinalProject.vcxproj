@@ -147,6 +147,7 @@
     <ClCompile Include="Item.cpp" />
     <ClCompile Include="Key.cpp" />
     <ClCompile Include="Map.cpp" />
+    <ClCompile Include="Openable.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Room.cpp" />
     <ClCompile Include="SDEV230_HammondTheresa_M08FinalProject.cpp" />
@@ -160,6 +161,7 @@
     <ClInclude Include="Item.h" />
     <ClInclude Include="Key.h" />
     <ClInclude Include="Map.h" />
+    <ClInclude Include="Openable.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Room.h" />
   </ItemGroup>

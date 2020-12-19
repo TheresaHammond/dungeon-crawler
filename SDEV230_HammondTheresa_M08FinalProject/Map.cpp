@@ -472,8 +472,6 @@ void Map::seed_chests(void) {
 				if (map[i][j]->door_count == 1) {
 					map[i][j]->chest = new Chest;
 					if (debg) cout << "CHEST CREATED IN (" << i << ", " << j << ")" << endl;
-					// lock all chests (for now)
-					map[i][j]->chest->locked = true;
 
 					// create objects that will go in chest
 					Item* item = new Key; // put one key in all of the chests (for now)

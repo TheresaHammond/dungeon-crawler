@@ -1,4 +1,5 @@
 #include "Door.h"
+
 #include <string>
 #include <iostream>
 #include <list>
@@ -17,8 +18,8 @@ Door::Door(Room* current, Room* next) { // constructor!
 	this->locked = false;
 	this->name = "Door";
 	this->desc = "It's a plain wooden door.";
-	list<string> locations{ "" }; // leave blank for now
-	this->location = "nearby";
+	// list<string> locations{ "" }; // leave blank for now
+	this->location = " nearby.";
 	this->takeable = false;
 	this->a_rooms[0] = current; // insert connecting rooms to door ref
 	this->a_rooms[1] = next;
