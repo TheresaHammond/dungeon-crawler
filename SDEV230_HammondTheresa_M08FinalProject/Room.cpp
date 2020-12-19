@@ -70,7 +70,7 @@ void Room::describe() {
 		// if there are any items in the room, show the items! (if light level)
 		if (!item_list.empty()) { 
 			for (list<Item*>::iterator it = item_list.begin(); it != item_list.end(); ++it) {
-				cout << "\n>> You see a " << (*it)->get_name() << " " << (*it)->get_location() << ".";
+				cout << "\n>> You see a " << (*it)->name << " " << (*it)->location << ".";
 			}
 		}
 	//}

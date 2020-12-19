@@ -27,7 +27,7 @@ public:
 	int get_def();
 	void set_room(Room* room);
 	Room* get_room();
-	void set_name(string name);
+	void set_name(std::string name);
 	std::string get_name();
 	void get_stats();
 };

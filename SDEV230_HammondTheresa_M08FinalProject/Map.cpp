@@ -1,4 +1,6 @@
 #include "Map.h"
+#include "HealthPotion.h"
+#include "Key.h"
 #include <algorithm> // for random_shuffle()
 
 using namespace std;
@@ -32,6 +34,16 @@ Map::Map(int size, Player& player, bool debg) { // CONSTRUCTOR (generates entire
 		 }
 		 iteration++; // go to next iteration
 	 }
+
+	 // seed chests at dead ends of map (may sometimes include starting room)
+	 if (debg) cout << "SEEDING CHESTS..." << endl;
+	 seed_chests();
+
+	 // drop an item on the floor in the starting room (for testing)
+	 if (debg) cout << "DROPPING STARTING ITEM..." << endl;
+	 Item* potion = new HealthPotion;
+	 start->item_list.push_back(potion);
+	 potion = nullptr;
 
 	 cout << ">> Dungeon generation complete!" << endl;
 }
@@ -230,6 +242,9 @@ void Map::path_erase(Room* start, Room*& current) {
 	// reset main path start
 	current = start;
 
+	// reset door count for start
+	start->door_count = 0;
+
 	if (debg) cout << "PATH ERASED." << endl;
 }
 	
@@ -293,7 +308,10 @@ void Map::door_create(Room* current, int direction, Room* next) {
 	// if the other room is the exit, create a Big Door
 	if (next->is_exit) door = new BigDoor(current, next);
 	// else create regular door
-	else door = new Door(current, next);
+	else {
+		door = new Door(current, next);
+		if (debg) cout << "CREATING DOOR FROM (" << current->x << ", " << current->y << ") to (" << next->x << ", " << next->y << ")..." << endl;
+	}
 	// put doors of main path in door list (for deletion in case of main path failure)
 	if (iteration == 0) v_doors.push_back(door);
 	current->a_doors[direction] = door; // place pointer to outgoing door in current room
@@ -445,3 +463,23 @@ void Map::draw_player(Player& player) {
 	cout << "[S] - Starting room" << endl;
 	cout << "[E] - Exit" << endl;
 } */
+
+void Map::seed_chests(void) {
+	// put a chest in each room with only one door
+	for (int i = 0; i < size; i++) {
+		for (int j = 0; j < size; j++) {
+			if (map[i][j]) {
+				if (map[i][j]->door_count == 1) {
+					map[i][j]->chest = new Chest;
+					if (debg) cout << "CHEST CREATED IN (" << i << ", " << j << ")" << endl;
+					// create objects that will go in chest
+					Item* item = new Key; // put one key in all of the chests (for now)
+					map[i][j]->chest->items.push_back(item); // put item in chest
+					item = new HealthPotion;
+					map[i][j]->chest->items.push_back(item); // put item in chest
+					item = nullptr; // no dangling
+				}
+			}
+		}
+	}
+}

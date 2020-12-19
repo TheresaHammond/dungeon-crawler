@@ -1,4 +1,5 @@
 #include "Item.h"
+
 #include <string>
 #include <iostream>
 #include <list>
@@ -20,23 +21,21 @@ Item::Item(void) { // CONSTRUCTOR
 	}
 	this->location = *it;
 }
-string Item::get_name() { // name getter
-	return name;
-}
-string Item::get_location() { // location getter
-	return location;
-}
-string Item::get_desc() { // description getter
-	return desc;
-}
+
 void Item::status() { // shows more information about this thing (using look function) (virtual)
 	cout << ">> Nothing else to report about this." << endl;
 }
-void Item::use() { // apply item effect (yay runtime polymorphism!) (virtual)
-	cout << "\n>> You use the " << this->get_name() << "." << endl;
+
+void Item::use(Player& player) { // apply item effect (yay runtime polymorphism!) (virtual)
+	cout << "\n>> You use the " << name << "." << endl;
 	cout << ">> Nothing happened." << endl;
 }
+
 void Item::kick() { // fun stuff (virtual)
 	cout << ">> Nothing happened." << endl;
+}
+
+void Item::describe() {
+	cout << "\n>> [" << name << "]: " << desc << endl;
 }
 

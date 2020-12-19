@@ -1,5 +1,10 @@
 #include "BigDoor.h"
 
+#include <string>
+#include <list>
+
+using namespace std;
+
 BigDoor::BigDoor(void) { // def con
 	// cout << "Default big door constructor!" << endl;
 }
@@ -10,7 +15,7 @@ BigDoor::BigDoor(Room* current, Room* next) { // constructor!
 		a_rooms[i] = 0; // initialize all pointers as null
 	}
 	this->open = false; // boss door always closed & locked by default
-	this->locked = true; 
+	this->locked = false; // should be true later on when keys are implemented!
 	this->name = "Big Door";
 	this->desc = "A massive, gilded door. Requires an equally massive key.";
 	list<string> locations{ "" }; // leave blank for now
