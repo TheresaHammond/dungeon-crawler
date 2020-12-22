@@ -11,8 +11,11 @@ HealthPotion::HealthPotion(void) { // CONSTRUCTOR
 	this->effect = 20;
 }
 
-void HealthPotion::use() {
+int HealthPotion::use(Player& player) {
+	// return TRUE goes back to MAIN
+	// return FALSE loops again through INTERACT
 	cout << "\n>> You use the " << name << "." << endl;
 	cout << ">> This doesn't do anything yet!" << endl;
+	return 0; // go back to INTERACT
 }
 

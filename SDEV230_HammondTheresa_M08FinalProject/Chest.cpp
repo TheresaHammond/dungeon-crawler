@@ -6,47 +6,61 @@
 using namespace std;
 
 Chest::Chest(void) { // constructor
-	this->open = false; // closed and unlocked by default
-	this->locked = false;
-	// this->location = "nearby";
-	// this->takeable = false;
+	this->locked = true; // all locked by default (for now)
 	list<Item*>::iterator it = items.begin();
 	this->name = "Chest";
 	this->desc = "It's an ordinary wooden chest.";
 }
 
-void Chest::use(Player& player) { // interaction between player and chest
-	if (locked) {
-		cout << "\n>> The " << name << " is locked.";
-		// if player has a key in their inventory, prompt them to use a key to open the chest
-	}
-	if (!open) {
-		cout << "\n>> You open the " << name << "." << endl;
-		this->open = true;
-	}
-	if (open) {
-		if (items.empty()) cout << "\n>> The " << name << " is empty." << endl;
-		else { // access items inside
+int Chest::open_action(Player& player) { // what the chest does when it's opened
+	// return 0 loops again through INTERACT
+	// return 1 goes back to EXAMINE
+	// return 2 goes back to MAIN
+	while (true) { // loop this while items are in the chest
+		if (items.empty()) {
+			cout << ">> The " << name << " is empty." << endl; // no nl bc pairs w/ other flavor text
+			return 0; // loop INTERACT again
+		}
+
+		else { // list items inside
 			int choice = (items.size() + 1); // cancel by default
-			cout << "\n What will you take?" << endl;
+			cout << "\nThere are items inside. What will you take?" << endl;
 			for (it = items.begin(); it != items.end(); ++it) { // list items
-				cout << ((distance(items.begin(), it)) + 1) << " . . . " << (*it)->get_name() << endl;
+				cout << ((distance(items.begin(), it)) + 1) << " . . . " << (*it)->name << endl;
 			}
-			cout << items.size() << " . . . Take All" << endl;
-			cout << (items.size() + 1) << " . . . Cancel" << endl;
+			cout << (items.size() + 1) << " . . . Take All" << endl;
+			cout << (items.size() + 2) << " . . . Cancel" << endl;
 			cout << "Enter choice: ";
-			cin >> choice;
+			while (!(cin >> choice)) { // input validation
+				cout << "\n>> Whoops! Try again." << endl;
+				cin.clear();
+				cin.ignore(10000, '\n');
+				cout << "Enter choice: ";
+			}
+			cin.clear(); // clear input buffer
+			cin.ignore(10000, '\n');
 
 			// Take All
-			if (choice == items.size()) { // add all items in chest to player backpack
+			if (choice == (items.size() + 1)) { // add all items in chest to player backpack
 				for (it = items.begin(); it != items.end(); ++it) {
-					player.addto_backpack(*it); // add pointer to player backpack
-					items.erase(it); // delete pointer from list
+					if ((*it)->name == "Key") // keys are somewhat different (don't go in backpack list)
+						player.keyring++; // add to keyring
+					else if ((*it)->name == "Big Key")
+						player.bigkey = true;
+					else player.addto_backpack(*it); // add pointer to player backpack
+
+					if (((*it)->name == "Key") || ((*it)->name == "Big Key"))
+						delete (*it); // delete key object
 				}
+				items.clear(); // when finished, delete all pointers from list (avoids issues with iterator and erase)
+
+				cout << "\n>> You put all of the items into your backpack." << endl;
+				// loop again
 			}
 			// Cancel
-			else if (choice >= (items.size() + 1)) { // don't take anything and exit menu
+			else if ((choice <= 0) || (choice >= (items.size() + 2))) { // don't take anything and exit menu
 				cout << "\n>> You decide not to take anything." << endl;
+				return 0; // loop INTERACT again
 			}
 			// Item chosen
 			else { // select that item and add it to player backpack
@@ -54,15 +68,31 @@ void Chest::use(Player& player) { // interaction between player and chest
 				while ((distance(items.begin(), it) + 1) != choice) {
 					++it; // iterate until it matches choice (chosen item located)
 				}
-				player.addto_backpack(*it); // add pointer to player backpack
+				if ((*it)->name == "Key") { // keys are somewhat different (don't go in backpack list)
+					player.keyring++; // add to keyring
+				}
+				else if ((*it)->name == "Big Key") {
+					player.bigkey = true;
+				}
+				else {
+					player.addto_backpack(*it); // add pointer to player backpack
+				}
+
+				// form output
+				cout << "\n>> You put the " << (*it)->name;
+				if (((*it)->name == "Key") || ((*it)->name == "Big Key")) {
+					cout << " on your key ring." << endl;
+					delete (*it); // delete key object (won't be used again)
+				}
+				else cout << " in your backpack." << endl;
+
 				items.erase(it); // delete pointer from list
+				// loop again
 			}
 		}
 	}
 }
 
-void Chest::status() {
-	if (locked) cout << "\n>> The " << name << " is locked." << endl;
-	else if (!open) cout << "\n>> The " << name << " is closed." << endl;
-	else cout << "\n>> The " << name << " is open." << endl;
-}
+void Chest::status() { // no new line bc pairs with other flavor text
+	if (!open) cout << ">> The " << name << " is closed." << endl;
+	else cout << ">> The " << name << " is open." << endl;

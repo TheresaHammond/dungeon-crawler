@@ -1,7 +1,6 @@
 #include "Player.h"
 #include "Room.h"
 
-
 #include <iostream>
 #include <string>
 
@@ -9,11 +8,13 @@ using namespace std;
 
 Player::Player(string name) { // constructor
 	this->name = name;
-	this->hp = 100;
-	this->str = 5;
-	this->def = 5;
-	this->intel = 5;
-	this->move_count = 0;
+	this->hp = 100; // health points
+	this->str = 5; // strength
+	this->def = 5; // defense
+	this->intel = 5; // intelligence
+	this->move_count = 0; // number of times player has changed rooms
+	this->keyring = 10; // number of keys player currently has
+	this->bigkey = true; // whether player has big key
 }
 
 // ADD ITEM TO BACKPACK
@@ -32,6 +33,14 @@ void Player::open_backpack() {
 
 	// cout << "Backpack size: " << backpack.size() << endl; // DEBUG
 
+	// show amount of keys player has (before item list) (this is one sentence)
+	cout << "\n>> You have " << keyring;
+	if (keyring == 1) cout << " key";
+	else cout << " keys";
+	if (bigkey) cout << " and a Big Key";
+	cout << " on your key ring." << endl;
+
+	// show backpack item list
 	while ((item_choice != (backpack.size() + 1)) && (menu_choice != 5)) {
 		if (backpack.empty()) { // exits loop (closes backpack)
 			cout << "\n>> Your backpack is empty." << endl;
@@ -40,7 +49,7 @@ void Player::open_backpack() {
 		else {
 			cout << "\nItems in backpack:" << endl; // generates enumerated list of all items currently in backpack
 			for (list<Item*>::iterator it = backpack.begin(); it != backpack.end(); ++it) {
-				cout << ((distance(backpack.begin(), it)) + 1) << " . . . " << (*it)->get_name() << endl; // double dereference, yay
+				cout << ((distance(backpack.begin(), it)) + 1) << " . . . " << (*it)->name << endl; // double dereference, yay
 			}
 			cout << (backpack.size() + 1) << " . . . Close backpack" << endl; // show exit condition 
 			cout << "Choose an item: "; // item choice prompt
@@ -90,7 +99,7 @@ void Player::open_backpack() {
 						//cout << ">> [" << (*it)->name << ": " << (*it)->desc << "]" << endl;
 						break;
 					case 2: // Use
-						(*it)->use();
+						(*it)->use(*this); 
 						// ADD: if single-use item, delete item from backpack and go back to item list
 						/* if ((*it)->single.use = true) {
 						*	backpack.erase(it);
@@ -128,7 +137,8 @@ void Player::open_backpack() {
 	}
 }
 
-bool Player::move() {
+bool Player::move_menu() { // this code is used by the MOVE option in MAIN menu
+
 	cout << "\nMove where?" << endl;
 
 	string dir;
@@ -144,20 +154,21 @@ bool Player::move() {
 			// get directional value based on door index
 			switch (i) {
 			case 0:
-				dir = "North";
+				dir = "North ";
 				break;
 			case 1:
-				dir = "East";
+				dir = "East ";
 				break;
 			case 2:
-				dir = "South";
+				dir = "South ";
 				break;
 			case 3:
-				dir = "West";
+				dir = "West ";
 				break;
 			}
+			room->a_doors[i]->dir = dir; // update door dirs (for flavor text)
 			// show menu (one entry for each door)
-			cout << counter << " . . . " << dir << " door" << endl;
+			cout << counter << " . . . " << dir << room->a_doors[i]->name << endl;
 			counter++;
 		}
 	}
@@ -181,33 +192,34 @@ bool Player::move() {
 	
 	counter = 0; // reusing this to find door of choice
 
+	cout << "\n"; // blank space for formatting (Examine text shows other stuff before Use text)
+
 	// look for player choice
 	for (int i = 0; i < 4; i++) {
 		if (room->a_doors[i]) { // if door found at that index
 			counter++; // count that door (finds first available, second available, etc)
-			if (counter == choice) {
-				// check whether door is locked
-				if (room->a_doors[i]->locked) {
-					cout << "\n>> Door is locked and requires a key." << endl;
-					return false;
-				}
-				else {
-					// look for adjacent room inside door (that doesn't match current room)
-					for (int j = 0; j < 2; j++) {
-						if (room->a_doors[i]->a_rooms[j] != room) {
-							cout << "\n>> You move through the door." << endl;
-							room = room->a_doors[i]->a_rooms[j]; // move player to that room
-							room->describe(); // tell us about the new room
-							if (room->visited) cout << "\n>> You have been here before." << endl;
-							if (!room->visited) room->visited = true; // mark room as visited if it hasn't been
-							move_count++;
-							if (room->is_exit) return true; // return true only if player's is now in exit
-							else return false;
-							// potential combat activation here???
-						}
-					}
-				}
+			if (counter == choice) { // door is found
+				// activate use method of that door (checks whether locked, prompts to open, activates move, etc)
+				room->a_doors[i]->status(); // show current status of door
+				room->a_doors[i]->use(*this);
+				return false; // only return true if want to end game...
 			}
+		}
+	}
+}
+
+bool Player::move(Door& door) { // move through actual door
+	for (int j = 0; j < 2; j++) {
+		if (door.a_rooms[j] != room) {
+			cout << "\n>> You move through the " << door.dir << door.name << "." << endl;
+			room = door.a_rooms[j]; // move player to that room
+			room->describe(); // tell us about the new room
+			if (room->visited) cout << "\n>> You have been here before." << endl;
+			if (!room->visited) room->visited = true; // mark room as visited if it hasn't been
+			move_count++;
+			if (room->is_exit) return true; // return true only if player's is now in exit
+			else return false;
+			// potential combat activation here???
 		}
 	}
 }
@@ -219,7 +231,7 @@ void Player::examine() {
 	list<Item*>::iterator it = room->item_list.begin();
 	int list_count = 0; // pushes cancel option to end of list depending on doors & chest existence
 
-	while (!look_exit) { // Keep looping through menu until exit condition reached!
+	while (!look_exit) { // keep looping while look_exit is false
 		cout << "\nExamine what?" << endl;
 		// first list room itself (first item in list is THIS room)
 		// cout << "Items in room: " << item_list.size() << endl; // DEBUG
@@ -231,25 +243,27 @@ void Player::examine() {
 		cout << "1 . . . Room" << endl; // look at the room itself (always at 1)
 		list_count = 2; // set list count start
 		// show doors (if they exist)
-		// iterate through a_doors and if any found, show them and their location and iterate list count
+		// iterate through a_doors and if any found, show them and their location, iterate list count, and put dir values in doors
 		for (int i = 0; i < 4; i++) {
-			if (room->a_doors[i]) {
+			if (room->a_doors[i]) { // if door found
 				string dir;
 				switch (i) { // location of door
 				case 0:
-					dir = "North";
+					dir = "North "; // space afterward for proper text fit
 					break;
 				case 1:
-					dir = "East";
+					dir = "East ";
 					break;
 				case 2:
-					dir = "South";
+					dir = "South ";
 					break;
 				case 3:
-					dir = "West";
+					dir = "West ";
 					break;
 				}
-				cout << list_count << " . . . " << dir << " Door" << endl;
+
+				room->a_doors[i]->dir = dir; // put location value in door (for flavor text)
+				cout << list_count << " . . . " << room->a_doors[i]->dir << room->a_doors[i]->name << endl;
 				list_count++; // increment to push cancel option to end of list
 			}
 		}
@@ -259,7 +273,7 @@ void Player::examine() {
 		}
 		if (!room->item_list.empty()) { // show items (if there are any)
 			for (list<Item*>::iterator it = room->item_list.begin(); it != room->item_list.end(); ++it) {
-				cout << ((distance(room->item_list.begin(), it)) + list_count) << " . . . " << (*it)->get_name() << endl;
+				cout << ((distance(room->item_list.begin(), it)) + list_count) << " . . . " << (*it)->name << endl;
 			}
 		}
 		cout << (room->item_list.size() + list_count) << " . . . Cancel" << endl; // show exit condition (always at the end)
@@ -279,13 +293,15 @@ void Player::examine() {
 		// cancel if option chosen, or choice out of scope
 		if ((choice >= (room->item_list.size() + list_count)) || (choice < 1)) {
 			cout << "\n>> You decide to do something else." << endl; // nothing else happens; loops back to main menu
-			look_exit = true;
 			break;
+			//look_exit = true;
+			//continue;
 		}
 
 		// if cancel not chosen, do stuff depending on what item was selected (oh my god this is a nightmare lol)
 		if (choice == 1) { // current room selected
 			room->describe();
+			// stay inside loop
 		}
 		else if ((choice >= 2) && (choice <= room->door_count + 1)) { // choice is a door, show status of that door
 			// find the correct door using math lol
@@ -293,15 +309,20 @@ void Player::examine() {
 			for (int d = 0; d < 4; d++) { // iterate through possible doors in room
 				if (room->a_doors[d]) // if door exists
 					if (counter == 0) {
-						room->a_doors[d]->status(); // show status of door
-						break;
+						room->a_doors[d]->describe(); // show info about door
+						room->a_doors[d]->status(); 
+						look_exit = interact(room->a_doors[d], 0); // start interaction menu
+						break; // break for loop
 					}
 					else counter--; // decrement counter			
 			}
 		}
 		else if (choice >= room->door_count + 2) { // choice is a chest (if it exists)
 			if ((room->chest) && (choice == room->door_count + 2)) {
+				room->chest->describe(); // show info about chest
 				room->chest->status();
+				look_exit = interact(room->chest, 0); // start interaction menu
+				// interact returns true if we want to go straight back to the main menu
 				continue;
 			}
 			if (!room->item_list.empty()) { // choice is an item scattered in room
@@ -318,11 +339,11 @@ void Player::examine() {
 	}
 }
 
-bool Player::interact(Item* item, int index) {
+bool Player::interact(Item* item, int index) { // index used for take command (if takeable)
 	// ITEM INTERACTION LIST
 	int choice = 0;
-	while (true) {
-		cout << "\nWhat will you do with the " << item->name << "?" << endl;
+	while (true) { // dir only not blank for doors
+		cout << "\nWhat will you do with the " << item->dir << item->name << "?" << endl;
 		// iterate through and read interaction list of item
 		cout << "1 . . . Use" << endl; // (*it)->use();
 		cout << "2 . . . Take" << endl; // if takeable = true, (*it)->addto_backpack, delete from room list
@@ -341,12 +362,18 @@ bool Player::interact(Item* item, int index) {
 
 		switch (choice) { // actions based on choice
 		case 1: // Use
-			item->use();
-			// if single-use, delete item from list
-			// item_list.erase(it);
-			// update room list
-			// room.set_item_list(item_list);
-			return true; // leave function entirely and go back to main menu
+			cout << "\n>> You decide to use the " << item->dir << item->name << "." << endl;
+			// TRUE goes back to MAIN
+			// FALSE loops again through INTERACT
+
+			switch (item->use(*this)) {
+			case 0: // loop INTERACT again
+				continue;
+			case 1: // go back to EXAMINE
+				return false;
+			case 2: // go back to MAIN
+				return true;
+			}
 		case 2: // Take
 			if (item->takeable == true) {
 				cout << "\n>> You add the " << item->name << " to your backpack." << endl;
@@ -356,17 +383,17 @@ bool Player::interact(Item* item, int index) {
 					++it;
 				}
 				room->item_list.erase(it); // delete item pointer from room list
-				return true; // go back to MAIN menu (not look menu)
+				return true; // go back to MAIN menu (not EXAMINE menu)
 			}
-			else cout << "\n>> You try to take the " << item->name << ", but it won't budge." << endl;
+			else cout << "\n>> You try to take the " << item->dir << item->name << ", but it won't budge." << endl;
 			continue; // loop this menu again
 		case 3: // Kick
-			cout << "\n>> You kick the " << item->name << "." << endl;
+			cout << "\n>> You kick the " << item->dir << item->name << "." << endl;
 			item->kick();
 			continue; // loop this menu again
 		case 4: // Pick something else
 			cout << "\n>> You decide to look at something else." << endl;
-			return false; // leave this function and go back to LOOK menu
+			return false; // leave this function and go back to EXAMINE menu
 		default: // Stop looking (also case 5)
 			cout << "\n>> You decide to do something else." << endl;
 			return true; // go back to MAIN menu

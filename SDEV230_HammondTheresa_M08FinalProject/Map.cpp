@@ -1,5 +1,8 @@
 #include "Map.h"
 #include "HealthPotion.h"
+#include "Key.h"
+#include "BigKey.h"
+
 #include <algorithm> // for random_shuffle()
 
 using namespace std;
@@ -471,6 +474,16 @@ void Map::seed_chests(void) {
 				if (map[i][j]->door_count == 1) {
 					map[i][j]->chest = new Chest;
 					if (debg) cout << "CHEST CREATED IN (" << i << ", " << j << ")" << endl;
+          
+					// create objects that will go in chest
+					Item* item = new Key; // put one key in all of the chests (for now)
+					map[i][j]->chest->items.push_back(item); // put item in chest
+					item = new HealthPotion;
+					map[i][j]->chest->items.push_back(item); // put item in chest
+					// item = new BigKey;
+					// start->chest->items.push_back(item); // put Big Key in starting room chest (uhh...)
+					item = nullptr; // no dangling
+
 				}
 			}
 		}

@@ -7,7 +7,7 @@ private:
 	int effect;
 public:
 	HealthPotion(void);
-	void use();
+	int use(Player& player);
 };
 
 

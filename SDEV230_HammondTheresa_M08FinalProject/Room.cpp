@@ -34,6 +34,10 @@ Room::~Room(void) { // destructor
 	// cout << "ROOM DELETED." << endl;
 }
 
+bool Room::is_an_exit(void) {
+	return is_exit;
+}
+
 int Room::get_x() {
 	return x;
 }
@@ -63,16 +67,19 @@ void Room::describe() {
 	} */
 	//else {
 		// show how many doors are in room
-		if (door_count > 1) { // singular/plural
-			cout << "\n>> There are " << door_count << " doors.";
+	cout << "\n>> The room has " << door_count;
+	if (door_count == 1) cout << " door. ";
+	else cout << " doors."; 
+
+	// if chest in room, show it in description
+	if (chest) cout << "\n>> There is a " << chest->name << chest->location;
+
+	// if there are any items in the room, show the items (if light level)
+	if (!item_list.empty()) { 
+		for (list<Item*>::iterator it = item_list.begin(); it != item_list.end(); ++it) {
+			cout << "\n>> You see a " << (*it)->name << (*it)->location;
 		}
-		else cout << "\n>> There is " << door_count << " door. ";
-		// if there are any items in the room, show the items! (if light level)
-		if (!item_list.empty()) { 
-			for (list<Item*>::iterator it = item_list.begin(); it != item_list.end(); ++it) {
-				cout << "\n>> You see a " << (*it)->get_name() << " " << (*it)->get_location() << ".";
-			}
-		}
+	}
 	//}
 	cout << endl;
 }

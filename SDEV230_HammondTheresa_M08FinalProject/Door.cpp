@@ -1,4 +1,6 @@
 #include "Door.h"
+#include "Player.h"
+
 #include <string>
 #include <iostream>
 #include <list>
@@ -13,43 +15,45 @@ Door::Door(Room* current, Room* next) { // constructor!
 	for (int i = 0; i < 2; i++) {
 		a_rooms[i] = 0; // initialize all pointers as null
 	}
-	this->open = false; // closed and unlocked by default
-	this->locked = false;
+	this->locked = true;
 	this->name = "Door";
 	this->desc = "It's a plain wooden door.";
-	list<string> locations{ "" }; // leave blank for now
-	this->location = "nearby";
-	this->takeable = false;
+	// list<string> locations{ "" }; // leave blank for now
+	this->location = " nearby.";
 	this->a_rooms[0] = current; // insert connecting rooms to door ref
 	this->a_rooms[1] = next;
 }
 
-Door::~Door(void) { // destructor
-	// cout << "DOOR DELETED." << endl;
-}
+int Door::open_action(Player& player) { // what door does when you use it while it's open
+	// return 0 loops again through INTERACT
+	// return 1 goes back to EXAMINE
+	// return 2 goes back to MAIN
+	int choice;
 
-void Door::status() {
-	if (!open && !locked) { // closed and unlocked
-		cout << "\n>> The " << this->get_name() << " is closed." << endl;
+	// when door is open, player has option to go through it
+	cout << "\nWill you go through?" << endl;
+	cout << "1 . . . Yes" << endl;
+	cout << "2 . . . No" << endl;
+	cout << "Enter choice: ";
+	while (!(cin >> choice)) { // input validation
+		cout << "\n>> Whoops! Try again." << endl;
+		cin.clear();
+		cin.ignore(10000, '\n');
+		cout << "Enter choice: ";
 	}
-	else if (!locked) { // already open
-		cout << "\n>> The " << this->get_name() << " is open." << endl;
-	} // is locked (and closed)
-	else cout << "\n>>The " << this->get_name() << " is locked." << endl;
-}
+	cin.clear(); // clear input buffer
+	cin.ignore(10000, '\n');
 
-void Door::use() {
-	if (!open && !locked) { // if closed and unlocked
-		cout << "\n>> You open the " << this->get_name() << "." << endl;
-		open = true; // open object
-		// prompt for "will you go through?" yes/no
+	if (choice == 1) { // yes
+		player.move(*this); // move player to next room
+		return 2; // exit INTERACT/EXAMINE and go to MAIN
 	}
-	else if (!locked) { // already open
-		cout << "\n>> The " << this->get_name() << " is already open." << endl;
-	} // is locked (and closed)
-	else cout << "\n>> You try to open the " << this->get_name() << ", but it's locked." << endl;
+	else { // no
+		cout << "\n>> You decide not to go through the " << dir << name << "." << endl;
+		return 0; // exit this function and loop INTERACT again
+	}
 }
 
 void Door::kick() {
-	cout << ">> The " << this->get_name() << " rattles." << endl;
+	cout << ">> The " << name << " rattles." << endl;
 }

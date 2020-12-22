@@ -4,6 +4,7 @@
 #include "Door.h"
 #include "BigDoor.h"
 #include "Player.h"
+
 #include <vector>
 
 class Map { // the dungeon map
@@ -15,8 +16,8 @@ private:
 	Door* door;
 	int iteration; // level of path gen (0 for main, ++ for each branch pass)
 	bool complete; // whether map gen has finished successfully or not
-	vector<Door*> v_doors;
-	vector<Door*>::iterator dsit;
+	std::vector<Door*> v_doors;
+	std::vector<Door*>::iterator dsit;
 	bool debg; // debug flag
 public:
 	Map(void); // default

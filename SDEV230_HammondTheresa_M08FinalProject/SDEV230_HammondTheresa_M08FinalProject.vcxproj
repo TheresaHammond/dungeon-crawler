@@ -140,24 +140,30 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BigDoor.cpp" />
+    <ClCompile Include="BigKey.cpp" />
     <ClCompile Include="Chest.cpp" />
     <ClCompile Include="Door.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="HealthPotion.cpp" />
     <ClCompile Include="Item.cpp" />
+    <ClCompile Include="Key.cpp" />
     <ClCompile Include="Map.cpp" />
+    <ClCompile Include="Openable.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Room.cpp" />
     <ClCompile Include="SDEV230_HammondTheresa_M08FinalProject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BigDoor.h" />
+    <ClInclude Include="BigKey.h" />
     <ClInclude Include="Chest.h" />
     <ClInclude Include="Door.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="HealthPotion.h" />
     <ClInclude Include="Item.h" />
+    <ClInclude Include="Key.h" />
     <ClInclude Include="Map.h" />
+    <ClInclude Include="Openable.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Room.h" />
   </ItemGroup>
