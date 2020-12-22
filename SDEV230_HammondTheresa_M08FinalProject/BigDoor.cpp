@@ -19,7 +19,6 @@ BigDoor::BigDoor(Room* current, Room* next) { // constructor!
 	}
 	this->open = false; // boss door always closed & locked by default
 	this->locked = true;
-	this->dir = ""; // will be filled in later
 	this->name = "Big Door";
 	this->desc = "A massive, gilded door. Requires an equally massive key.";
 	list<string> locations{ "" }; // leave blank for now

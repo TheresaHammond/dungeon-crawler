@@ -138,6 +138,7 @@ void Player::open_backpack() {
 }
 
 bool Player::move_menu() { // this code is used by the MOVE option in MAIN menu
+
 	cout << "\nMove where?" << endl;
 
 	string dir;
@@ -260,6 +261,7 @@ void Player::examine() {
 					dir = "West ";
 					break;
 				}
+
 				room->a_doors[i]->dir = dir; // put location value in door (for flavor text)
 				cout << list_count << " . . . " << room->a_doors[i]->dir << room->a_doors[i]->name << endl;
 				list_count++; // increment to push cancel option to end of list
@@ -363,7 +365,7 @@ bool Player::interact(Item* item, int index) { // index used for take command (i
 			cout << "\n>> You decide to use the " << item->dir << item->name << "." << endl;
 			// TRUE goes back to MAIN
 			// FALSE loops again through INTERACT
-\
+
 			switch (item->use(*this)) {
 			case 0: // loop INTERACT again
 				continue;
