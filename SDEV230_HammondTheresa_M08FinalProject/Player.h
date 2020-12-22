@@ -26,8 +26,8 @@ public:
 	void addto_backpack(Item* item);
 	void open_backpack();
 	void examine();
-	bool move();
-	bool move2(Door& door);
+	bool move_menu();
+	bool move(Door& door);
 	bool interact(Item* item, int index);
 };
 

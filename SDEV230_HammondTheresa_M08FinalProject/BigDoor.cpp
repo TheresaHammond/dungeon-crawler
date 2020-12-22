@@ -39,7 +39,7 @@ int BigDoor::use(Player& player) { // interaction between player and openable
 	int choice;
 
 	if (locked) { // closed and locked, prompt to unlock it
-		cout << ">> The " << name << " is locked." << endl;
+		cout << ">> The " << dir << name << " is locked." << endl;
 
 		// show text if player has NO keys
 		if (!player.bigkey) cout << ">> You do not have a Big Key." << endl;

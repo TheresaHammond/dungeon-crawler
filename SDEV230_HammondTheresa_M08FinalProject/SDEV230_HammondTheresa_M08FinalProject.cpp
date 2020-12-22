@@ -124,27 +124,25 @@ bool state_main(Player& player, Map& map) { // PASS OBJS BY REFERENCE!!!!!!!
 		cin.ignore(10000, '\n');
 
 		switch (choice) { // actions based on choice
-		case 1: // Look
+		case 1: // EXAMINE (Can open doors and chests)
 			player.examine();
 			return false; // break loop, loop again
-		case 2: // Move
-			if (player.move()) {
-				// flag and quit game when player enters exit room! (temp)
-				cout << "\n>> You have reached the exit." << endl;
-				return true; // break loop and end game
-			}
+		case 2: // MOVE (a faster way to move through doors than Examine)
+			player.move_menu();
+			if ((player.get_room())->is_an_exit())
+				return true; // break loop and end game if player is in exit room (temp solution)
 			else return false;
-		case 3: // Open backpack
+		case 3: // OPEN BACKPACK (Check inventory)
 			cout << "\n>> You open your backpack." << endl;
 			player.open_backpack(); // open the inventory (list of items)
 			return false;
-		case 4: // Check map
+		case 4: // CHECK MAP (Draws map)
 			cout << "\n>> You open your map." << endl;
 			map.draw_full(player);
 			return false;
-		case 5: // Check stats
+		case 5: // CHECK STATS (Shows player info)
 			cout << "\n>> You take stock of your current state." << endl;
-			player.get_stats(); // list player stats
+			player.get_stats();
 			return false;
 		default:
 			cout << "\n>> You decide to do nothing." << endl;

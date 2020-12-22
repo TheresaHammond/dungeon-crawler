@@ -42,7 +42,7 @@ int Openable::use(Player& player) { // interaction between player and openable
 
 			if (choice == 1) { // yes
 				cout << "\n>> You use a Key to unlock the " << dir << name << "." << endl;
-				cout << ">> The key sticks in the lock and is no longer usable." << endl;
+				cout << ">> The Key sticks in the lock and is no longer usable." << endl;
 				player.keyring--;
 				this->locked = false; // unlock openable (should open automatically next)
 			}

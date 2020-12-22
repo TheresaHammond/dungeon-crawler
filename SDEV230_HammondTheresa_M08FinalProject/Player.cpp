@@ -13,7 +13,7 @@ Player::Player(string name) { // constructor
 	this->def = 5; // defense
 	this->intel = 5; // intelligence
 	this->move_count = 0; // number of times player has changed rooms
-	this->keyring = 1; // number of keys player currently has
+	this->keyring = 10; // number of keys player currently has
 	this->bigkey = true; // whether player has big key
 }
 
@@ -137,7 +137,7 @@ void Player::open_backpack() {
 	}
 }
 
-bool Player::move() { // this code is used by the MOVE option (main menu)
+bool Player::move_menu() { // this code is used by the MOVE option in MAIN menu
 	cout << "\nMove where?" << endl;
 
 	string dir;
@@ -153,20 +153,21 @@ bool Player::move() { // this code is used by the MOVE option (main menu)
 			// get directional value based on door index
 			switch (i) {
 			case 0:
-				dir = "North";
+				dir = "North ";
 				break;
 			case 1:
-				dir = "East";
+				dir = "East ";
 				break;
 			case 2:
-				dir = "South";
+				dir = "South ";
 				break;
 			case 3:
-				dir = "West";
+				dir = "West ";
 				break;
 			}
+			room->a_doors[i]->dir = dir; // update door dirs (for flavor text)
 			// show menu (one entry for each door)
-			cout << counter << " . . . " << dir << " door" << endl;
+			cout << counter << " . . . " << dir << room->a_doors[i]->name << endl;
 			counter++;
 		}
 	}
@@ -190,41 +191,26 @@ bool Player::move() { // this code is used by the MOVE option (main menu)
 	
 	counter = 0; // reusing this to find door of choice
 
+	cout << "\n"; // blank space for formatting (Examine text shows other stuff before Use text)
+
 	// look for player choice
 	for (int i = 0; i < 4; i++) {
 		if (room->a_doors[i]) { // if door found at that index
 			counter++; // count that door (finds first available, second available, etc)
-			if (counter == choice) {
-				// check whether door is locked
-				if (room->a_doors[i]->locked) {
-					cout << "\n>> Door is locked and requires a key." << endl;
-					return false;
-				}
-				else {
-					// look for adjacent room inside door (that doesn't match current room)
-					for (int j = 0; j < 2; j++) {
-						if (room->a_doors[i]->a_rooms[j] != room) {
-							cout << "\n>> You move through the door." << endl;
-							room = room->a_doors[i]->a_rooms[j]; // move player to that room
-							room->describe(); // tell us about the new room
-							if (room->visited) cout << "\n>> You have been here before." << endl;
-							if (!room->visited) room->visited = true; // mark room as visited if it hasn't been
-							move_count++;
-							if (room->is_exit) return true; // return true only if player's is now in exit
-							else return false;
-							// potential combat activation here???
-						}
-					}
-				}
+			if (counter == choice) { // door is found
+				// activate use method of that door (checks whether locked, prompts to open, activates move, etc)
+				room->a_doors[i]->status(); // show current status of door
+				room->a_doors[i]->use(*this);
+				return false; // only return true if want to end game...
 			}
 		}
 	}
 }
 
-bool Player::move2(Door& door) { // this code is used by the INTERACT menu when using doors
+bool Player::move(Door& door) { // move through actual door
 	for (int j = 0; j < 2; j++) {
 		if (door.a_rooms[j] != room) {
-			cout << "\n>> You move through the door." << endl;
+			cout << "\n>> You move through the " << door.dir << door.name << "." << endl;
 			room = door.a_rooms[j]; // move player to that room
 			room->describe(); // tell us about the new room
 			if (room->visited) cout << "\n>> You have been here before." << endl;

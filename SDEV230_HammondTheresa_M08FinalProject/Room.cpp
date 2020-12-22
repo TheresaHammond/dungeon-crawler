@@ -34,6 +34,10 @@ Room::~Room(void) { // destructor
 	// cout << "ROOM DELETED." << endl;
 }
 
+bool Room::is_an_exit(void) {
+	return is_exit;
+}
+
 int Room::get_x() {
 	return x;
 }

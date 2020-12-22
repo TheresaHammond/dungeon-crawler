@@ -39,4 +39,5 @@ public:
 	int get_x();
 	int get_y();
 	void set_visited();
+	bool is_an_exit(void); // returns whether room is exit or not
 };

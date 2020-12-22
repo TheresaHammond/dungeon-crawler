@@ -45,7 +45,7 @@ int Door::open_action(Player& player) { // what door does when you use it while 
 	cin.ignore(10000, '\n');
 
 	if (choice == 1) { // yes
-		player.move2(*this); // move player to next room
+		player.move(*this); // move player to next room
 		return 2; // exit INTERACT/EXAMINE and go to MAIN
 	}
 	else { // no
