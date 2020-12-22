@@ -13,6 +13,7 @@ class Player :public Entity {
 	friend class Door;
 	friend class Chest;
 	friend class Openable;
+	friend class BigDoor;
 private:
 	std::list<Item*> backpack; // list of pointers to Item class (and subclasses)
 	// int carry_limit = 10;

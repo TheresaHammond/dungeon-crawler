@@ -20,34 +20,40 @@ int Openable::use(Player& player) { // interaction between player and openable
 	int choice;
 
 	if (locked) { // closed and locked, prompt to unlock it
-		cout << ">> The " << name << " is locked." << endl;
-		// if player has a key in their inventory, prompt them to use a key
-		if (player.keyring > 0) cout << "\nWould you like to use a key?" << endl;
-		cout << "1 . . . Yes" << endl;
-		cout << "2 . . . No" << endl;
-		cout << "Enter choice: ";
-		while (!(cin >> choice)) { // input validation
-			cout << "\n>> Whoops! Try again." << endl;
-			cin.clear();
-			cin.ignore(10000, '\n');
-			cout << "Enter choice: ";
-		}
-		cin.clear(); // clear input buffer
-		cin.ignore(10000, '\n');
+		cout << ">> The " << dir << name << " is locked." << endl;
 
-		if (choice == 1) { // yes
-			cout << "\n>> You use a key to unlock the " << name << "." << endl;
-			cout << ">> The key sticks in the lock and is no longer usable." << endl;
-			player.keyring--;
-			this->locked = false; // unlock openable (should open automatically next)
-		}
-		else { // no
-			cout << "\n>> You decide not to use a key." << endl;
-			return 0; // exit this function (go back to INTERACT menu)
+		// show text if player has NO keys
+		if (player.keyring <= 0) cout << ">> You do not have any Keys." << endl;
+
+		// if player has a key in their inventory, prompt them to use a key
+		if (player.keyring > 0) {
+			cout << "\nWould you like to use a Key?" << endl;
+			cout << "1 . . . Yes" << endl;
+			cout << "2 . . . No" << endl;
+			cout << "Enter choice: ";
+			while (!(cin >> choice)) { // input validation
+				cout << "\n>> Whoops! Try again." << endl;
+				cin.clear();
+				cin.ignore(10000, '\n');
+				cout << "Enter choice: ";
+			}
+			cin.clear(); // clear input buffer
+			cin.ignore(10000, '\n');
+
+			if (choice == 1) { // yes
+				cout << "\n>> You use a Key to unlock the " << dir << name << "." << endl;
+				cout << ">> The key sticks in the lock and is no longer usable." << endl;
+				player.keyring--;
+				this->locked = false; // unlock openable (should open automatically next)
+			}
+			else { // no
+				cout << "\n>> You decide not to use a Key." << endl;
+				return 0; // exit this function (go back to INTERACT menu)
+			}
 		}
 	}
 	if ((!open) && (!locked)) { // closed but not locked, will open
-		cout << ">> You open the " << name << "." << endl;
+		cout << ">> You open the " << dir << name << "." << endl;
 		this->open = true;
 	}
 	if (open) // should run immediately after opening the thing
@@ -62,6 +68,6 @@ int Openable::open_action(Player& player) { // what item does when it's opened
 }
 
 void Openable::status() { // no new line bc pairs with other flavor text
-	if (!open) cout << ">> The " << name << " is closed." << endl;
-	else cout << ">> The " << name << " is open." << endl;
+	if (!open) cout << ">> The " << dir << name << " is closed." << endl;
+	else cout << ">> The " << dir << name << " is open." << endl;
 }

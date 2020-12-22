@@ -51,6 +51,9 @@
     <ClCompile Include="Openable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="BigKey.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Item.h">
@@ -84,6 +87,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Openable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BigKey.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

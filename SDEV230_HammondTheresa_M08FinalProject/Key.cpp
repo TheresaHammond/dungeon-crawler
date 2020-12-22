@@ -12,7 +12,7 @@ using namespace std;
 
 Key::Key(void) { // constructor
 	this->name = "Key";
-	this->desc = "It's a plain, rusty metal key.";
+	this->desc = "A plain, rusty metal key.";
 	this->multiuse = false;
 	this->takeable = true;
 	this->equippable = false;

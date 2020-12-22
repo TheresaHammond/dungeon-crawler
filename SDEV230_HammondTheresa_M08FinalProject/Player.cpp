@@ -14,7 +14,7 @@ Player::Player(string name) { // constructor
 	this->intel = 5; // intelligence
 	this->move_count = 0; // number of times player has changed rooms
 	this->keyring = 1; // number of keys player currently has
-	this->bigkey = false; // whether player has big key
+	this->bigkey = true; // whether player has big key
 }
 
 // ADD ITEM TO BACKPACK
@@ -256,25 +256,26 @@ void Player::examine() {
 		cout << "1 . . . Room" << endl; // look at the room itself (always at 1)
 		list_count = 2; // set list count start
 		// show doors (if they exist)
-		// iterate through a_doors and if any found, show them and their location and iterate list count
+		// iterate through a_doors and if any found, show them and their location, iterate list count, and put dir values in doors
 		for (int i = 0; i < 4; i++) {
-			if (room->a_doors[i]) {
+			if (room->a_doors[i]) { // if door found
 				string dir;
 				switch (i) { // location of door
 				case 0:
-					dir = "North";
+					dir = "North "; // space afterward for proper text fit
 					break;
 				case 1:
-					dir = "East";
+					dir = "East ";
 					break;
 				case 2:
-					dir = "South";
+					dir = "South ";
 					break;
 				case 3:
-					dir = "West";
+					dir = "West ";
 					break;
 				}
-				cout << list_count << " . . . " << dir << " Door" << endl;
+				room->a_doors[i]->dir = dir; // put location value in door (for flavor text)
+				cout << list_count << " . . . " << room->a_doors[i]->dir << room->a_doors[i]->name << endl;
 				list_count++; // increment to push cancel option to end of list
 			}
 		}
@@ -353,8 +354,8 @@ void Player::examine() {
 bool Player::interact(Item* item, int index) { // index used for take command (if takeable)
 	// ITEM INTERACTION LIST
 	int choice = 0;
-	while (true) {
-		cout << "\nWhat will you do with the " << item->name << "?" << endl;
+	while (true) { // dir only not blank for doors
+		cout << "\nWhat will you do with the " << item->dir << item->name << "?" << endl;
 		// iterate through and read interaction list of item
 		cout << "1 . . . Use" << endl; // (*it)->use();
 		cout << "2 . . . Take" << endl; // if takeable = true, (*it)->addto_backpack, delete from room list
@@ -373,7 +374,7 @@ bool Player::interact(Item* item, int index) { // index used for take command (i
 
 		switch (choice) { // actions based on choice
 		case 1: // Use
-			cout << "\n>> You decide to use the " << item->name << "." << endl;
+			cout << "\n>> You decide to use the " << item->dir << item->name << "." << endl;
 			// TRUE goes back to MAIN
 			// FALSE loops again through INTERACT
 \
@@ -396,10 +397,10 @@ bool Player::interact(Item* item, int index) { // index used for take command (i
 				room->item_list.erase(it); // delete item pointer from room list
 				return true; // go back to MAIN menu (not EXAMINE menu)
 			}
-			else cout << "\n>> You try to take the " << item->name << ", but it won't budge." << endl;
+			else cout << "\n>> You try to take the " << item->dir << item->name << ", but it won't budge." << endl;
 			continue; // loop this menu again
 		case 3: // Kick
-			cout << "\n>> You kick the " << item->name << "." << endl;
+			cout << "\n>> You kick the " << item->dir << item->name << "." << endl;
 			item->kick();
 			continue; // loop this menu again
 		case 4: // Pick something else

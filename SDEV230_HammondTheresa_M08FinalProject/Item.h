@@ -15,6 +15,7 @@ protected:
 	std::string desc;
 	std::string location;
 	std::list<std::string> locations; // list of available interactions
+	std::string dir; // only for doors
 public:
 	bool takeable;
 	bool equippable;

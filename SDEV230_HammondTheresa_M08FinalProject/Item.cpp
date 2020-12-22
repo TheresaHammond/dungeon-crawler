@@ -12,6 +12,7 @@ Item::Item(void) { // CONSTRUCTOR
 	this->equippable = false;
 	this->name = "Default Item";
 	this->desc = "This item does nothing.";
+	this->dir = ""; // only for doors (filled in later)
 
 	// randomly generate item location (for flavor text)
 	this->locations = { " on the floor.", " on a shelf.", " next to you.", " at your feet.", " in a corner." }; // list of available interactions

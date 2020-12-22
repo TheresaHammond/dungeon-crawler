@@ -140,6 +140,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BigDoor.cpp" />
+    <ClCompile Include="BigKey.cpp" />
     <ClCompile Include="Chest.cpp" />
     <ClCompile Include="Door.cpp" />
     <ClCompile Include="Entity.cpp" />
@@ -154,6 +155,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BigDoor.h" />
+    <ClInclude Include="BigKey.h" />
     <ClInclude Include="Chest.h" />
     <ClInclude Include="Door.h" />
     <ClInclude Include="Entity.h" />

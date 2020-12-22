@@ -15,6 +15,7 @@ Door::Door(Room* current, Room* next) { // constructor!
 	for (int i = 0; i < 2; i++) {
 		a_rooms[i] = 0; // initialize all pointers as null
 	}
+	this->locked = true;
 	this->name = "Door";
 	this->desc = "It's a plain wooden door.";
 	// list<string> locations{ "" }; // leave blank for now
@@ -48,7 +49,7 @@ int Door::open_action(Player& player) { // what door does when you use it while 
 		return 2; // exit INTERACT/EXAMINE and go to MAIN
 	}
 	else { // no
-		cout << "\n>> You decide not to go through the door." << endl;
+		cout << "\n>> You decide not to go through the " << dir << name << "." << endl;
 		return 0; // exit this function and loop INTERACT again
 	}
 }

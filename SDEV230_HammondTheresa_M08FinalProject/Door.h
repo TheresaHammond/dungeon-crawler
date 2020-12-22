@@ -16,6 +16,6 @@ protected:
 public:
 	Door(void); // default
 	Door(Room* current, Room* next); // constructor
-	void kick();
-	int open_action(Player& player);
+	virtual void kick();
+	virtual int open_action(Player& player);
 };
