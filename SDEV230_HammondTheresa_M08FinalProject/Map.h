@@ -7,6 +7,7 @@
 
 #include <vector>
 
+
 class Map { // the dungeon map
 private:
 	int size;
@@ -19,6 +20,7 @@ private:
 	bool complete; // whether map gen has finished successfully or not
 	std::vector<Door*> v_doors;
 	std::vector<Door*>::iterator dsit;
+	std::vector<int> keyqueue; // holds info for key generation location (iteration) based on locked doors
 	bool debg; // debug flag
 public:
 	Map(void); // default

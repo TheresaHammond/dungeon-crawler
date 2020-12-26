@@ -7,6 +7,7 @@
 class Player;
 
 class Openable : public Item {
+	friend class Map;
 protected:
 	bool open;
 	bool locked;

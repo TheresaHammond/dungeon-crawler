@@ -294,6 +294,7 @@ bool Map::room_create(Room*& current, int direction, Room* next, int iteration) 
 
 // door creation function (takes in x and y of new room, not the current one)
 void Map::door_create(Room* current, int direction, Room* next) {
+	int doorlock;
 	int indir;
 	switch (direction) {
 	case 0:
@@ -314,6 +315,14 @@ void Map::door_create(Room* current, int direction, Room* next) {
 	// else create regular door
 	else {
 		door = new Door(current, next);
+		// if door created on a branch iteration, roll for door lock (25% chance) if on branched path
+		if (iteration > 0) {
+			doorlock = rand() % 100;
+			if (doorlock <= 24) {
+				door->locked = true;
+				keyqueue.push_back(iteration); // add iteration number to list for key generation
+			}
+		}
 		if (debg) cout << "CREATING DOOR FROM (" << current->x << ", " << current->y << ") to (" << next->x << ", " << next->y << ")..." << endl;
 	}
 	// put doors of main path in door list (for deletion in case of main path failure)
@@ -491,8 +500,6 @@ void Map::seed_chests(void) {
 					if (debg) cout << "CHEST CREATED IN (" << i << ", " << j << ")" << endl;
           
 					// SEED ITEMS IN CHEST
-					item = new Key; // put one key in all of the chests (for now)
-					map[i][j]->chest->items.push_back(item); // put item in chest
 					item = new HealthPotion;
 					map[i][j]->chest->items.push_back(item); // put item in chest
 					item = nullptr; // no dangling
@@ -500,6 +507,35 @@ void Map::seed_chests(void) {
 			}
 		}
 	}
+
+	// PLACE KEYS
+	// for each item in keyqueue, pick a random room in the proper iteration and spawn a key there
+	int x;
+	int y;
+
+	vector<int>::iterator kit = keyqueue.begin();
+	for (int i = 0; i < keyqueue.size(); i++) {
+		// pick a random room
+		while (true) {
+			x = rand() % size; // column coordinate
+			y = rand() % size; // row coordinate
+			if (((x == 0) || (x == size - 1)) && ((y == 0) || (y == size - 1)))
+				if (map[x][y]) // if room exists and is of correct iteration (previous to one in keyqueue), break loop
+					if (map[x][y]->iteration == ((*kit) - 1))
+						break; 
+						// NOTE: because doors are only locked in branches, should be impossible for previous iteration to not exist
+		}
+
+		// create key and put in chest (if exists), or room (if chest does not exist)
+		item = new Key;
+		if (map[x][y]->chest)
+			map[x][y]->chest->items.push_back(item);
+		else map[x][y]->item_list.push_back(item);
+
+		++kit; // increment keyqueue
+	}
+	item = nullptr; // clean up
+	keyqueue.clear(); 
 
 	// SEED BIG KEY
 	for (int i = 0; i < size; i++) {
