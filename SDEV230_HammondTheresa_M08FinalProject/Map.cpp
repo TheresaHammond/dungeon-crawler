@@ -13,6 +13,7 @@ Map::Map(int size, Player& player, bool debg) { // CONSTRUCTOR (generates entire
 	this->size = size;
 	this->iteration = 0; // level of path gen (0 for main, ++ for each branch pass)
 	this->complete = false;
+	this->depth = 0; // highest iteration in which a room exists 
 	Room* start = nullptr;
 	Room* current = nullptr;
 	vector<Door*>::iterator dsit = v_doors.begin(); // iterator for door list
@@ -195,6 +196,7 @@ bool Map::path_gen(Room*& current) {
 
 			if (room_create(current, direction, next, iteration)) {
 				room_created = true;
+				depth = iteration; // record current depth of map
 				room_count++; // count number of rooms (used for branches)
 				break; // break inner while loop, go to next iteration in for loop
 			}
@@ -367,8 +369,6 @@ bool Map::room_check(Room* current, int direction, Room*& next) {
 			}
 			return true;
 	}
-	// if it gets down here, something real bad happened
-	// return false;
 }
 
 // DRAW MAP
@@ -382,7 +382,9 @@ void Map::draw_full(Player& player) {
 					if (map[i][j]) { // true if pointer not null (room exists)
 						// draw "you are here" icon if player is in room
 						if (map[i][j] == player.room) cout << "[X]";
-						// else draw  default map icon for each room
+						// else draw chest locations (debug)
+						// else if ((!map[i][j]->is_exit) && (map[i][j]->chest)) cout << "[C]";
+						// else draw default map icon for each room
 						else cout << map[i][j]->map_icon;
 					}
 					else cout << " x "; // no room exists there
@@ -406,6 +408,7 @@ void Map::draw_full(Player& player) {
 	cout << "[X] - You are here" << endl;
 	cout << "[S] - Starting room" << endl;
 	cout << "[E] - Exit" << endl;
+	if (debg) cout << "(DEBUG) Depth: " << depth << endl;
 }
 
 /* // DRAW MAP 2
@@ -466,26 +469,54 @@ void Map::draw_player(Player& player) {
 	cout << "[E] - Exit" << endl;
 } */
 
+// place items dynamically inside map chests
 void Map::seed_chests(void) {
-	// put a chest in each room with only one door
-	for (int i = 0; i < size; i++) {
+
+	// create chest list (used to seed boss key)
+	vector<Room*> chests;
+	vector<Room*>::iterator chit;
+
+	Item* item; // placeholder ptr for generated items
+	int chestchance; // generate random number between 0 and 9
+
+	// SEED CHESTS
+	for (int i = 0; i < size; i++) { 
 		for (int j = 0; j < size; j++) {
-			if (map[i][j]) {
-				if (map[i][j]->door_count == 1) {
+			if (map[i][j]) { // for every room in map (if room exists)
+				chestchance = rand() % 10; // roll random
+
+				 // put a chest in each room with only one door, OR a random 20% chance to spawn one in a non-dead end
+				if ((map[i][j]->door_count == 1) || (chestchance <= 1)) {
 					map[i][j]->chest = new Chest;
 					if (debg) cout << "CHEST CREATED IN (" << i << ", " << j << ")" << endl;
           
-					// create objects that will go in chest
-					Item* item = new Key; // put one key in all of the chests (for now)
+					// SEED ITEMS IN CHEST
+					item = new Key; // put one key in all of the chests (for now)
 					map[i][j]->chest->items.push_back(item); // put item in chest
 					item = new HealthPotion;
 					map[i][j]->chest->items.push_back(item); // put item in chest
-					// item = new BigKey;
-					// start->chest->items.push_back(item); // put Big Key in starting room chest (uhh...)
 					item = nullptr; // no dangling
-
 				}
 			}
 		}
 	}
+
+	// SEED BIG KEY
+	for (int i = 0; i < size; i++) {
+		for (int j = 0; j < size; j++) {
+			if (map[i][j]) { // for every room in map (if room exists)
+				// find all chests in deepest iteration of map, then randomly choose a chest to put boss key in
+				if (map[i][j]->iteration == depth)
+					if (map[i][j]->chest)
+						chests.push_back(map[i][j]); // put chest in chest list
+			}
+		}
+	}
+	random_shuffle(chests.begin(), chests.end()); // shuffle chests
+	chit = chests.begin(); // set iterator to first element 
+	item = new BigKey;
+	(*chit)->chest->items.push_back(item); // put big key in chest chosen by iterator
+	(*chit)->map_icon = "[K]"; // change map icon (debug)
+	item = nullptr; // clean up
+	chests.clear();
 }

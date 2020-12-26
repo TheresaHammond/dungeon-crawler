@@ -10,6 +10,7 @@
 class Map { // the dungeon map
 private:
 	int size;
+	int depth; // highest iteration in which a room exists 
 	Room*** map; // actual map array
 	Room* start; // starting room
 	bool finished;

@@ -15,7 +15,7 @@ Door::Door(Room* current, Room* next) { // constructor!
 	for (int i = 0; i < 2; i++) {
 		a_rooms[i] = 0; // initialize all pointers as null
 	}
-	this->locked = true;
+	this->locked = false;
 	this->name = "Door";
 	this->desc = "It's a plain wooden door.";
 	// list<string> locations{ "" }; // leave blank for now

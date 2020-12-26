@@ -13,8 +13,8 @@ Player::Player(string name) { // constructor
 	this->def = 5; // defense
 	this->intel = 5; // intelligence
 	this->move_count = 0; // number of times player has changed rooms
-	this->keyring = 10; // number of keys player currently has
-	this->bigkey = true; // whether player has big key
+	this->keyring = 100; // number of keys player currently has
+	this->bigkey = false; // whether player has big key
 }
 
 // ADD ITEM TO BACKPACK
