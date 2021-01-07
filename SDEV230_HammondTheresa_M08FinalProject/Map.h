@@ -7,9 +7,11 @@
 
 #include <vector>
 
+
 class Map { // the dungeon map
 private:
 	int size;
+	int depth; // highest iteration in which a room exists 
 	Room*** map; // actual map array
 	Room* start; // starting room
 	bool finished;
@@ -18,6 +20,7 @@ private:
 	bool complete; // whether map gen has finished successfully or not
 	std::vector<Door*> v_doors;
 	std::vector<Door*>::iterator dsit;
+	std::vector<int> keyqueue; // holds info for key generation location (iteration) based on locked doors
 	bool debg; // debug flag
 public:
 	Map(void); // default

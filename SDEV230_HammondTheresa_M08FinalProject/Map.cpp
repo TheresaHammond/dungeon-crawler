@@ -13,6 +13,7 @@ Map::Map(int size, Player& player, bool debg) { // CONSTRUCTOR (generates entire
 	this->size = size;
 	this->iteration = 0; // level of path gen (0 for main, ++ for each branch pass)
 	this->complete = false;
+	this->depth = 0; // highest iteration in which a room exists 
 	Room* start = nullptr;
 	Room* current = nullptr;
 	vector<Door*>::iterator dsit = v_doors.begin(); // iterator for door list
@@ -195,6 +196,7 @@ bool Map::path_gen(Room*& current) {
 
 			if (room_create(current, direction, next, iteration)) {
 				room_created = true;
+				depth = iteration; // record current depth of map
 				room_count++; // count number of rooms (used for branches)
 				break; // break inner while loop, go to next iteration in for loop
 			}
@@ -292,6 +294,7 @@ bool Map::room_create(Room*& current, int direction, Room* next, int iteration) 
 
 // door creation function (takes in x and y of new room, not the current one)
 void Map::door_create(Room* current, int direction, Room* next) {
+	int doorlock;
 	int indir;
 	switch (direction) {
 	case 0:
@@ -312,6 +315,14 @@ void Map::door_create(Room* current, int direction, Room* next) {
 	// else create regular door
 	else {
 		door = new Door(current, next);
+		// if door created on a branch iteration, roll for door lock (25% chance) if on branched path
+		if (iteration > 0) {
+			doorlock = rand() % 100;
+			if (doorlock <= 24) {
+				door->locked = true;
+				keyqueue.push_back(iteration); // add iteration number to list for key generation
+			}
+		}
 		if (debg) cout << "CREATING DOOR FROM (" << current->x << ", " << current->y << ") to (" << next->x << ", " << next->y << ")..." << endl;
 	}
 	// put doors of main path in door list (for deletion in case of main path failure)
@@ -367,8 +378,6 @@ bool Map::room_check(Room* current, int direction, Room*& next) {
 			}
 			return true;
 	}
-	// if it gets down here, something real bad happened
-	// return false;
 }
 
 // DRAW MAP
@@ -382,7 +391,9 @@ void Map::draw_full(Player& player) {
 					if (map[i][j]) { // true if pointer not null (room exists)
 						// draw "you are here" icon if player is in room
 						if (map[i][j] == player.room) cout << "[X]";
-						// else draw  default map icon for each room
+						// else draw chest locations (debug)
+						// else if ((!map[i][j]->is_exit) && (map[i][j]->chest)) cout << "[C]";
+						// else draw default map icon for each room
 						else cout << map[i][j]->map_icon;
 					}
 					else cout << " x "; // no room exists there
@@ -406,6 +417,7 @@ void Map::draw_full(Player& player) {
 	cout << "[X] - You are here" << endl;
 	cout << "[S] - Starting room" << endl;
 	cout << "[E] - Exit" << endl;
+	if (debg) cout << "(DEBUG) Depth: " << depth << endl;
 }
 
 /* // DRAW MAP 2
@@ -466,26 +478,81 @@ void Map::draw_player(Player& player) {
 	cout << "[E] - Exit" << endl;
 } */
 
+// place items dynamically inside map chests
 void Map::seed_chests(void) {
-	// put a chest in each room with only one door
-	for (int i = 0; i < size; i++) {
+
+	// create chest list (used to seed boss key)
+	vector<Room*> chests;
+	vector<Room*>::iterator chit;
+
+	Item* item; // placeholder ptr for generated items
+	int chestchance; // generate random number between 0 and 9
+
+	// SEED CHESTS
+	for (int i = 0; i < size; i++) { 
 		for (int j = 0; j < size; j++) {
-			if (map[i][j]) {
-				if (map[i][j]->door_count == 1) {
+			if (map[i][j]) { // for every room in map (if room exists)
+				chestchance = rand() % 10; // roll random
+
+				 // put a chest in each room with only one door, OR a random 20% chance to spawn one in a non-dead end
+				if ((map[i][j]->door_count == 1) || (chestchance <= 1)) {
 					map[i][j]->chest = new Chest;
 					if (debg) cout << "CHEST CREATED IN (" << i << ", " << j << ")" << endl;
           
-					// create objects that will go in chest
-					Item* item = new Key; // put one key in all of the chests (for now)
-					map[i][j]->chest->items.push_back(item); // put item in chest
+					// SEED ITEMS IN CHEST
 					item = new HealthPotion;
 					map[i][j]->chest->items.push_back(item); // put item in chest
-					// item = new BigKey;
-					// start->chest->items.push_back(item); // put Big Key in starting room chest (uhh...)
 					item = nullptr; // no dangling
-
 				}
 			}
 		}
 	}
+
+	// PLACE KEYS
+	// for each item in keyqueue, pick a random room in the proper iteration and spawn a key there
+	int x;
+	int y;
+
+	vector<int>::iterator kit = keyqueue.begin();
+	for (int i = 0; i < keyqueue.size(); i++) {
+		// pick a random room
+		while (true) {
+			x = rand() % size; // column coordinate
+			y = rand() % size; // row coordinate
+			if (((x == 0) || (x == size - 1)) && ((y == 0) || (y == size - 1)))
+				if (map[x][y]) // if room exists and is of correct iteration (previous to one in keyqueue), break loop
+					if (map[x][y]->iteration == ((*kit) - 1))
+						break; 
+						// NOTE: because doors are only locked in branches, should be impossible for previous iteration to not exist
+		}
+
+		// create key and put in chest (if exists), or room (if chest does not exist)
+		item = new Key;
+		if (map[x][y]->chest)
+			map[x][y]->chest->items.push_back(item);
+		else map[x][y]->item_list.push_back(item);
+
+		++kit; // increment keyqueue
+	}
+	item = nullptr; // clean up
+	keyqueue.clear(); 
+
+	// SEED BIG KEY
+	for (int i = 0; i < size; i++) {
+		for (int j = 0; j < size; j++) {
+			if (map[i][j]) { // for every room in map (if room exists)
+				// find all chests in deepest iteration of map, then randomly choose a chest to put boss key in
+				if (map[i][j]->iteration == depth)
+					if (map[i][j]->chest)
+						chests.push_back(map[i][j]); // put chest in chest list
+			}
+		}
+	}
+	random_shuffle(chests.begin(), chests.end()); // shuffle chests
+	chit = chests.begin(); // set iterator to first element 
+	item = new BigKey;
+	(*chit)->chest->items.push_back(item); // put big key in chest chosen by iterator
+	(*chit)->map_icon = "[K]"; // change map icon (debug)
+	item = nullptr; // clean up
+	chests.clear();
 }

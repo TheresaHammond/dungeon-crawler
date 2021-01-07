@@ -96,3 +96,4 @@ int Chest::open_action(Player& player) { // what the chest does when it's opened
 void Chest::status() { // no new line bc pairs with other flavor text
 	if (!open) cout << ">> The " << name << " is closed." << endl;
 	else cout << ">> The " << name << " is open." << endl;
+}
