@@ -29,6 +29,7 @@ public:
 	bool move_menu();
 	bool move(Door& door);
 	bool interact(Item* item, int index);
+	void status_menu();
 };
 
 

@@ -42,7 +42,7 @@ bool state_combat(Player &player, Room* room, Entity &entity) {
 		// run post-combat stuff
 		return false; // leave combat state
 	} else {
-		cout << "\nWhat's your next move?" << endl;
+		cout << "\nYou are in combat. What's your next move?" << endl;
 		cout << "1 . . . Attack" << endl; // attack enemy
 		cout << "2 . . . Defend" << endl; // defend from attack
 		cout << "3 . . . Open backpack" << endl; // player.open_backpack();
@@ -112,7 +112,7 @@ bool state_main(Player& player, Map& map) { // PASS OBJS BY REFERENCE!!!!!!!
 		cout << "2 . . . Move" << endl;
 		cout << "3 . . . Open backpack" << endl;
 		cout << "4 . . . Check map" << endl;
-		cout << "5 . . . Check stats" << endl; 
+		cout << "5 . . . Check self" << endl; 
 		cout << "Enter choice: ";
 		while (!(cin >> choice)) {
 			cout << "\n>> Whoops! Try again." << endl;
@@ -133,16 +133,15 @@ bool state_main(Player& player, Map& map) { // PASS OBJS BY REFERENCE!!!!!!!
 				return true; // break loop and end game if player is in exit room (temp solution)
 			else return false;
 		case 3: // OPEN BACKPACK (Check inventory)
-			cout << "\n>> You open your backpack." << endl;
 			player.open_backpack(); // open the inventory (list of items)
 			return false;
 		case 4: // CHECK MAP (Draws map)
 			cout << "\n>> You open your map." << endl;
 			map.draw_full(player);
 			return false;
-		case 5: // CHECK STATS (Shows player info)
+		case 5: // CHECK SELF (Shows player info)
 			cout << "\n>> You take stock of your current state." << endl;
-			player.get_stats();
+			player.status_menu();
 			return false;
 		default:
 			cout << "\n>> You decide to do nothing." << endl;

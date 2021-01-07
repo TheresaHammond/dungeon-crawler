@@ -10,6 +10,7 @@ Chest::Chest(void) { // constructor
 	list<Item*>::iterator it = items.begin();
 	this->name = "Chest";
 	this->desc = "It's an ordinary wooden chest.";
+	this->type = "Interactable";
 }
 
 int Chest::open_action(Player& player) { // what the chest does when it's opened

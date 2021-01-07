@@ -145,8 +145,10 @@
     <ClCompile Include="Door.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="HealthPotion.cpp" />
+    <ClCompile Include="IronSword.cpp" />
     <ClCompile Include="Item.cpp" />
     <ClCompile Include="Key.cpp" />
+    <ClCompile Include="LeatherArmor.cpp" />
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="Openable.cpp" />
     <ClCompile Include="Player.cpp" />
@@ -160,8 +162,10 @@
     <ClInclude Include="Door.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="HealthPotion.h" />
+    <ClInclude Include="IronSword.h" />
     <ClInclude Include="Item.h" />
     <ClInclude Include="Key.h" />
+    <ClInclude Include="LeatherArmor.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="Openable.h" />
     <ClInclude Include="Player.h" />

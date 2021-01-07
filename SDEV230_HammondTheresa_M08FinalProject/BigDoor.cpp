@@ -25,6 +25,7 @@ BigDoor::BigDoor(Room* current, Room* next) { // constructor!
 	this->location = "nearby";
 	this->a_rooms[0] = current; // insert connecting rooms to door ref
 	this->a_rooms[1] = next;
+	this->type = "Interactable";
 }
 
 void BigDoor::kick() {

@@ -9,12 +9,19 @@ class Room;
 
 class Entity {
 protected:
-	int hp; // health
+	int hp; // current health value
+	int maxhp; // max health value
+	int level; // current level
+	int xp; // experience
+	int maxxp; // max exp to next level
 	std::string name;
 	Room* room; // pointer to current location
-	int str; // strength
+	int atk; // attack power
 	int def; // defense
 	int intel; // intelligence
+	Item* weapon;
+	Item* armor;
+	std::list<std::string> status_list; // list of statuses inflicted on the player
 public:
 	Entity(void);
 	void set_hp(int change);

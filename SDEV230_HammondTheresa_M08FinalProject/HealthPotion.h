@@ -3,8 +3,6 @@
 #include "Item.h"
 
 class HealthPotion :public Item {
-private:
-	int effect;
 public:
 	HealthPotion(void);
 	int use(Player& player);

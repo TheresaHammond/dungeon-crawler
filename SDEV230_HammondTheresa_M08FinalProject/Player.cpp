@@ -8,13 +8,19 @@ using namespace std;
 
 Player::Player(string name) { // constructor
 	this->name = name;
-	this->hp = 100; // health points
-	this->str = 5; // strength
+	this->level = 1;
+	this->xp = 0;
+	this->maxxp = 50;
+	this->hp = 20; // health points
+	this->maxhp = hp;
+	this->atk = 5; // strength
 	this->def = 5; // defense
 	this->intel = 5; // intelligence
 	this->move_count = 0; // number of times player has changed rooms
 	this->keyring = 100; // number of keys player currently has
 	this->bigkey = false; // whether player has big key
+	this->weapon = nullptr;
+	this->armor = nullptr;
 }
 
 // ADD ITEM TO BACKPACK
@@ -23,6 +29,8 @@ void Player::addto_backpack(Item* item) {
 }
 // BACKPACK MENU
 void Player::open_backpack() {
+	cout << "\n>> You open your backpack." << endl;
+
 	// enumerate and print list of items in backpack
 	int item_choice = -1; // initialize
 	int menu_choice = 0;
@@ -47,12 +55,12 @@ void Player::open_backpack() {
 			item_choice = 1; // forces exit condition
 		}
 		else {
-			cout << "\nItems in backpack:" << endl; // generates enumerated list of all items currently in backpack
+			cout << "\nWhich item will you choose?" << endl; // generates enumerated list of all items currently in backpack
 			for (list<Item*>::iterator it = backpack.begin(); it != backpack.end(); ++it) {
 				cout << ((distance(backpack.begin(), it)) + 1) << " . . . " << (*it)->name << endl; // double dereference, yay
 			}
 			cout << (backpack.size() + 1) << " . . . Close backpack" << endl; // show exit condition 
-			cout << "Choose an item: "; // item choice prompt
+			cout << "Enter choice: "; // item choice prompt
 			// get player input
 			while (!(cin >> item_choice)) { // input validation
 				cout << "\n>> Whoops! Try again." << endl;
@@ -66,6 +74,7 @@ void Player::open_backpack() {
 				// apply choice to menu item (opens item action menu)
 			if ((item_choice > backpack.size()) || (item_choice < 1)) { // if exit condition chosen
 				cout << "\n>> You close your backpack." << endl; // nothing else happens; loops back to main menu
+				break;
 			}
 			else { // ITEM ACTION MENU LOOP
 				list<Item*>::iterator it = backpack.begin(); // reset iterator to select item
@@ -76,10 +85,13 @@ void Player::open_backpack() {
 				action_exit = false;
 				while (!action_exit) { // only loop menu when examine/use chosen (everything else exits loop)
 					cout << "\nWhat will you do with the " << (*it)->name << "?" << endl; // confirm item selection
-					cout << "1 . . . Examine" << endl; // (*it)->describe();, loop again
-					cout << "2 . . . Use" << endl; // (*it)->use();, if single-use item, go back to item list
+					if (((*it)->type == "Weapon") || ((*it)->type == "Armor"))
+						cout << "1 . . . Equip" << endl; // equip item 
+					else cout << "1 . . . Use" << endl; // (*it)->use();, if single-use item, go back to item list
+
+					cout << "2 . . . Examine" << endl; // (*it)->describe();, loop again 
 					cout << "3 . . . Drop" << endl; // (*it)->drop();, go back to item list
-					cout << "4 . . . Pick something else" << endl; // Go back to item list
+					cout << "4 . . . Choose something else" << endl; // Go back to item list
 					cout << "5 . . . Cancel and close backpack" << endl; // Go back to main menu
 					cout << "Enter choice: ";
 					while (!(cin >> menu_choice)) { // input validation
@@ -92,14 +104,32 @@ void Player::open_backpack() {
 					cin.ignore(10000, '\n');
 
 					switch (menu_choice) { // actions based on choice
-					case 1: // Examine
-						cout << "\n>> You examine the " << (*it)->name << "." << endl;
-						(*it)->describe();
-						(*it)->status();
-						//cout << ">> [" << (*it)->name << ": " << (*it)->desc << "]" << endl;
-						break;
-					case 2: // Use
-						(*it)->use(*this); 
+					case 1: // Use/Equip
+						// EQUIP (this code sucks... wtf)
+						if (((*it)->type == "Weapon") || ((*it)->type == "Armor")) {
+							cout << "\n>> You decide to equip the " << (*it)->name << "." << endl;
+							if ((*it)->type == "Weapon") {
+								if (weapon) { // if player already has weapon equipped, store it
+									cout << ">> You unequip the " << weapon << " and put it in your backpack." << endl;
+									addto_backpack(this->weapon); // add pointer of current item to player's backpack
+								}
+								this->weapon = (*it); // replace weapon pointer with new item
+							}
+							else if ((*it)->type == "Armor") {
+								if (armor) { // if player already has armor equipped, store it
+									cout << ">> You unequip the " << armor << " and put it in your backpack." << endl;
+									addto_backpack(this->armor); // add pointer of current item to player's backpack
+								}
+								this->armor = (*it); // replace weapon pointer with new item
+							}
+							backpack.erase(it); // delete item pointer from backpack
+							item_choice = -1; // reset item choice (compensates for change in list size when item deleted)
+							action_exit = true; // goes back to ACTION menu
+							break;
+						}
+						// USE
+						else (*it)->use(*this);
+
 						// ADD: if single-use item, delete item from backpack and go back to item list
 						/* if ((*it)->single.use = true) {
 						*	backpack.erase(it);
@@ -109,6 +139,14 @@ void Player::open_backpack() {
 						*
 						* } */
 						break;
+
+					case 2: // Examine
+						cout << "\n>> You examine the " << (*it)->name << "." << endl;
+						(*it)->describe();
+						(*it)->status();
+						//cout << ">> [" << (*it)->name << ": " << (*it)->desc << "]" << endl;
+						break;
+
 					case 3: // Drop
 						cout << "\n>> You drop the " << (*it)->name << " on the floor." << endl;
 						room->item_list.push_back(*it); // push item to room item list instead (because it's now on the floor)
@@ -118,18 +156,16 @@ void Player::open_backpack() {
 						// cout << "Backpack size: " << backpack.size() << endl; // DEBUG
 						// cout << backpack << endl;
 						break;
-					case 4: // Pick something else
+
+					case 4: // Pick something else (goes back to ACTION menu)
 						cout << "\n>> You decide to choose something else." << endl;
 						action_exit = true;
 						break;
-					case 5: // Close backpack
+
+					default: // Close backpack (goes back to MAIN menu)
 						cout << "\n>> You put the " << (*it)->name  << " back and close your backpack." << endl;
 						action_exit = true;
-						break;
-					default:
-						cout << "\n>> You decide to do nothing." << endl;
-						action_exit = true;
-						break;
+						return;
 					}
 				}
 			}
@@ -339,13 +375,18 @@ void Player::examine() {
 	}
 }
 
-bool Player::interact(Item* item, int index) { // index used for take command (if takeable)
-	// ITEM INTERACTION LIST
+bool Player::interact(Item* item, int index) { // index used for take/equip commands
+	// ITEM INTERACTION LIST (from EXAMINE room or chest)
 	int choice = 0;
 	while (true) { // dir only not blank for doors
+
 		cout << "\nWhat will you do with the " << item->dir << item->name << "?" << endl;
+
 		// iterate through and read interaction list of item
-		cout << "1 . . . Use" << endl; // (*it)->use();
+		if ((item->type == "Weapon") || (item->type == "Armor"))
+			cout << "1 . . . Equip" << endl; // change this menu item depending on context
+		else cout << "1 . . . Use" << endl; // (*it)->use();
+
 		cout << "2 . . . Take" << endl; // if takeable = true, (*it)->addto_backpack, delete from room list
 		cout << "3 . . . Kick" << endl; // (*it)->kick(); // fun stuff
 		cout << "4 . . . Look at something else" << endl; // Go back to look list
@@ -361,19 +402,48 @@ bool Player::interact(Item* item, int index) { // index used for take command (i
 		cin.ignore(10000, '\n');
 
 		switch (choice) { // actions based on choice
-		case 1: // Use
-			cout << "\n>> You decide to use the " << item->dir << item->name << "." << endl;
-			// TRUE goes back to MAIN
-			// FALSE loops again through INTERACT
-
-			switch (item->use(*this)) {
-			case 0: // loop INTERACT again
-				continue;
-			case 1: // go back to EXAMINE
-				return false;
-			case 2: // go back to MAIN
-				return true;
+		case 1: // Use/Equip
+			if ((item->type == "Weapon") || (item->type == "Armor")) {
+				cout << "\n>> You decide to equip the " << item->name << "." << endl;
+				if (item->type == "Weapon") { // this is kind of a mess...
+					if (weapon) { // if player already has weapon equipped, store it
+						cout << ">> You unequip the " << weapon << " and put it in your backpack." << endl;
+						addto_backpack(this->weapon); // add pointer of current item to player's backpack
+					}
+					this->weapon = item; // replace weapon pointer with new item
+				}
+				if (item->type == "Armor") {
+					if (armor) { // if player already has armor equipped, store it
+						cout << ">> You unequip the " << armor << " and put it in your backpack." << endl;
+						addto_backpack(this->armor); // add pointer of current item to player's backpack
+					}
+					this->armor = item; // replace weapon pointer with new item
+				}
+				
+				// remove item from other host list (room)
+				list<Item*>::iterator it = room->item_list.begin(); // set iterator to start
+				while (index != (distance(room->item_list.begin(), it))) { // move iterator until it matches choice
+					++it;
+				}
+				room->item_list.erase(it); // delete item pointer from room list
+				return true; // go back to MAIN
 			}
+
+			else {
+				cout << "\n>> You decide to use the " << item->dir << item->name << "." << endl;
+				// TRUE goes back to MAIN
+				// FALSE loops again through INTERACT
+
+				switch (item->use(*this)) {
+				case 0: // loop INTERACT again
+					continue;
+				case 1: // go back to EXAMINE
+					return false;
+				case 2: // go back to MAIN
+					return true;
+				}
+			}
+			
 		case 2: // Take
 			if (item->takeable == true) {
 				cout << "\n>> You add the " << item->name << " to your backpack." << endl;
@@ -399,6 +469,116 @@ bool Player::interact(Item* item, int index) { // index used for take command (i
 			return true; // go back to MAIN menu
 		// default:
 			// cout << "\n>> You decide to do nothing." << endl;
+		}
+	}
+}
+
+void Player::status_menu(void) { // player can look at and modify stats and equipment
+
+	int choice;
+	while (true) {
+		this->get_stats(); // show player stats
+
+		// options menu
+		cout << "\nWhat would you like to do?" << endl;
+		cout << "1 . . . Open backpack" << endl;
+		cout << "2 . . . Unequip item(s)" << endl;
+		cout << "3 . . . Do something else" << endl;
+		cout << "Enter choice: ";
+		while (!(cin >> choice)) {
+			cout << "\n>> Whoops! Try again." << endl;
+			cin.clear();
+			cin.ignore(10000, '\n');
+			cout << "Enter choice: ";
+		}
+		cin.clear(); // clear input buffer
+		cin.ignore(10000, '\n');
+
+		switch (choice) {
+		case 1: // open backpack
+			open_backpack();
+			break;
+		case 2: // unequip
+			if ((!weapon) && (!armor)) { // don't open menu if nothing to unequip
+				cout << "\n>> You have nothing equipped." << endl;
+				continue; // start next loop
+			}
+			else {
+				int choice2;
+				int index;
+
+				// unequip menu
+				while ((weapon) || (armor)) { // only loop while something equipped!
+
+					index = 1;
+
+					cout << "\nUnequip what?" << endl;
+
+					if (weapon) {
+						cout << index << " . . . Weapon" << endl;
+						index++; // increment so can add more things afterward
+					}
+					if (armor) {
+						cout << index << " . . . Armor" << endl;
+						index++;
+					}
+					cout << index << " . . . Unequip all" << endl;
+					index++;
+					cout << index << " . . . Do nothing" << endl;
+
+					cout << "Enter choice: ";
+					while (!(cin >> choice2)) {
+						cout << "\n>> Whoops! Try again." << endl;
+						cin.clear();
+						cin.ignore(10000, '\n');
+						cout << "Enter choice: ";
+					}
+					cin.clear(); // clear input buffer
+					cin.ignore(10000, '\n');
+
+					if ((choice2 >= index) || (choice2 < 1)) { // exit condition (max indes or below 1)
+						cout << "\n>> You change your mind about unequipping." << endl;
+						break; // break while loop?
+					}
+					else if (choice2 == (index - 1)) { // unequip all
+						cout << "\n>> You unequip all of your items and put them in your backpack." << endl;
+						if (weapon) {
+							addto_backpack(weapon);
+							weapon = nullptr;
+						}
+						if (armor) {
+							addto_backpack(armor);
+							armor = nullptr;
+						}
+					}
+					else {
+						// put item back in backpack (change flavor text to match)
+						cout << "\n>> You unequip the "; // this is a HUGE mess, but it works, so...
+						if (choice2 == 1) {
+							if (weapon) {
+								cout << weapon->name;
+								addto_backpack(weapon);
+								weapon = nullptr;
+							}
+							else {
+								cout << armor->name;
+								addto_backpack(armor);
+								armor = nullptr;
+							}
+						}
+						if (choice2 == 2) {
+							cout << armor->name;
+							addto_backpack(armor);
+							armor = nullptr;
+						}
+						cout << " and put it in your backpack." << endl;
+					}
+				}
+			}
+			break;
+		default:
+			cout << "\n>> You decide to do something else." << endl;
+			return; // exit to MAIN
 		}
 	}
 }

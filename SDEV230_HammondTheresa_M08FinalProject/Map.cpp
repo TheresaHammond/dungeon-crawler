@@ -2,6 +2,8 @@
 #include "HealthPotion.h"
 #include "Key.h"
 #include "BigKey.h"
+#include "IronSword.h"
+#include "LeatherArmor.h"
 
 #include <algorithm> // for random_shuffle()
 
@@ -42,11 +44,15 @@ Map::Map(int size, Player& player, bool debg) { // CONSTRUCTOR (generates entire
 	 if (debg) cout << "SEEDING CHESTS..." << endl;
 	 seed_chests();
 
-	 // drop an item on the floor in the starting room (for testing)
-	 if (debg) cout << "DROPPING STARTING ITEM..." << endl;
-	 Item* potion = new HealthPotion;
-	 start->item_list.push_back(potion);
-	 potion = nullptr;
+	 // drop items on the floor in the starting room (for testing)
+	 if (debg) cout << "DROPPING STARTING ITEMS..." << endl;
+	 Item* item = new HealthPotion;
+	 start->item_list.push_back(item);
+	 item = new IronSword;
+	 start->item_list.push_back(item);
+	 item = new LeatherArmor;
+	 start->item_list.push_back(item);
+	 item = nullptr;
 
 	 cout << ">> Dungeon generation complete!" << endl;
 }

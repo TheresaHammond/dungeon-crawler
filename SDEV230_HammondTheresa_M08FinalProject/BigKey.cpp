@@ -8,4 +8,5 @@ BigKey::BigKey(void) { // constructor
 	this->multiuse = false;
 	this->takeable = true;
 	this->equippable = false;
+	this->type = "Consumable";
 }

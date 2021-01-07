@@ -22,6 +22,7 @@ Door::Door(Room* current, Room* next) { // constructor!
 	this->location = " nearby.";
 	this->a_rooms[0] = current; // insert connecting rooms to door ref
 	this->a_rooms[1] = next;
+	this->type = "Interactable";
 }
 
 int Door::open_action(Player& player) { // what door does when you use it while it's open
