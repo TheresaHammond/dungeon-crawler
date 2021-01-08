@@ -60,6 +60,9 @@
     <ClCompile Include="LeatherArmor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Kobold.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Item.h">
@@ -102,6 +105,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="LeatherArmor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Kobold.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

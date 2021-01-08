@@ -16,6 +16,7 @@ MAIN
 #include <string>
 #include <time.h>
 #include <list>
+
 // yeehaw look at all these classes
 #include "Item.h"
 #include "Door.h"
@@ -32,17 +33,20 @@ bool debg = false; // debug flag
 
 // DEFINE FUNCTIONS
 // combat state!
-bool state_combat(Player &player, Room* room, Entity &entity) {
+bool state_combat(Player &player, Entity &entity) {
 	int choice;
-	int damage = 0;
+	int damage;
+	string enemy = entity.get_name();
+
 	if (player.get_hp() <= 0) { // you died
+		cout << "\n>> You are dead." << endl;
 		return false; // leave combat state
 	} else if (entity.get_hp() <= 0) {
-		cout << "\n>> Enemy " << entity.get_name() << " has been defeated!" << endl;
+		cout << "\n>> Enemy " << enemy << " has been defeated!" << endl;
 		// run post-combat stuff
 		return false; // leave combat state
-	} else {
-		cout << "\nYou are in combat. What's your next move?" << endl;
+	} else { // PLAYER ACTION
+		cout << "\nWhat's your next move?" << endl;
 		cout << "1 . . . Attack" << endl; // attack enemy
 		cout << "2 . . . Defend" << endl; // defend from attack
 		cout << "3 . . . Open backpack" << endl; // player.open_backpack();
@@ -50,15 +54,22 @@ bool state_combat(Player &player, Room* room, Entity &entity) {
 		cout << "5 . . . Talk" << endl; // attempt to communicate
 		cout << "6 . . . Run" << endl; // go back to previous room (if possible)
 		cout << "Enter choice: ";
-		cin >> choice;
+		while (!(cin >> choice)) {
+			cout << "\n>> Whoops! Try again." << endl;
+			cin.clear();
+			cin.ignore(10000, '\n');
+			cout << "Enter choice: ";
+		}
+		cin.clear(); // clear input buffer
+		cin.ignore(10000, '\n');
 
 		switch (choice) { // actions based on choice
 		case 1: // Attack
-			cout << "\n>> You attack the " << entity.get_name() << "!" << endl;
+			cout << "\n>> You attack the " << enemy << "!" << endl;
 			// calculate damage
 			damage = 30; // change this later
 			if (damage < 0) damage = 0; // prevent negative numbers
-			cout << ">> The enemy " << entity.get_name() << " takes " << damage << " damage." << endl;
+			cout << ">> The enemy " << enemy << " takes " << damage << " damage." << endl;
 			entity.set_hp(damage);
 			break;
 		case 2: // Defend
@@ -76,15 +87,16 @@ bool state_combat(Player &player, Room* room, Entity &entity) {
 			break;
 		case 6: // Run
 			cout << "\n>> You attempt to flee!" << endl;
-			cout << ">> You escape to the previous room." << endl;
+			cout << ">> You have escaped." << endl;
+			// cout << ">> You escape to the previous room." << endl;
 			return false; // leave combat state
 			break;
 		default:
 			cout << "\n>> You do nothing." << endl;
 		}
 
-		// ENEMY ATTACK ALGORITHM HERE!
-		cout << "\n>> Enemy " << entity.get_name() << " attacks!" << endl;
+		// ENEMY ACTION (expand later/choice)
+		cout << "\n>> Enemy " << enemy << " attacks!" << endl;
 		damage = 10; // change this later
 		if (damage < 0) damage = 0; // prevent negative numbers
 		cout << ">> You take " << damage << " damage." << endl;
@@ -93,26 +105,38 @@ bool state_combat(Player &player, Room* room, Entity &entity) {
 }
 
 // main menu function!
-bool state_main(Player& player, Map& map) { // PASS OBJS BY REFERENCE!!!!!!!
-	// if player's room has enemy, switch to combat state (while loop). else:
+bool state_main(Player& player, Map& map) { // PASS OBJS BY REFERENCE!!!!!!
+
+	Room*& room = (player.get_room()); // this should return a reference instead of a copy... hopefully...
+	Entity*& enemy = (room->get_enemy());
+
+	// if current room has enemy, switch to combat state! ends when either enemy or player dies
+	if (enemy) {
+		bool combat = true;
+		cout << "\n>> A " << enemy->get_name() << " attacks you!" << endl; // could use some variations here
+		while (combat) { // remains true until combat ends (returns false)
+			combat = state_combat(player, *enemy); // what is going on with the references here?
+			if (player.get_hp() <= 0) {
+				return true; // game is over, you're dead
+			}
+			// else victory screen goes here?
+		}
+	}
+
+	// reiterate room description every time menu renews (combat takes priority)
+	// if room is new, set room as visited (so it describes as new only on first visit)
+	room->describe(); 
+	if (!(room->get_visited())) room->set_visited();
+
 	int choice;
-	/* bool combat = true;
-	cout << "\n>> " << entity.get_name() << " attacks you!" << endl;
-	while (combat) {
-		combat = state_combat(player, entity);
-	}
-	if (player.get_hp() <= 0) {
-		cout << "\n>> You are dead." << endl;
-		return true; // game is over, you're dead
-	}
-	else { */
+
 		if (debg) cout << "You are in room (" << (player.get_room())->get_x() << ", " << (player.get_room())->get_y() << ")" << endl;
 		cout << "\nWhat will you do next?" << endl;
-		cout << "1 . . . Examine" << endl; // 
-		cout << "2 . . . Move" << endl;
+		cout << "1 . . . Examine items" << endl; // 
+		cout << "2 . . . Use door" << endl;
 		cout << "3 . . . Open backpack" << endl;
-		cout << "4 . . . Check map" << endl;
-		cout << "5 . . . Check self" << endl; 
+		cout << "4 . . . View map" << endl;
+		cout << "5 . . . Check status" << endl; 
 		cout << "Enter choice: ";
 		while (!(cin >> choice)) {
 			cout << "\n>> Whoops! Try again." << endl;
@@ -146,8 +170,7 @@ bool state_main(Player& player, Map& map) { // PASS OBJS BY REFERENCE!!!!!!!
 		default:
 			cout << "\n>> You decide to do nothing." << endl;
 			return false;
-		//}
-	}
+		}
 }
 
 // MAIN
@@ -213,11 +236,6 @@ int main(void)
 	if (debg) map.draw_full(player);
 
 	cout << "\n>> You awaken in a strange new place." << endl;
-
-	// describe starting room
-	(player.get_room())->describe();
-	// set starting room as visited (set after so it describes as new)
-	(player.get_room())->set_visited();
 
 	// "What will you do next?"
 

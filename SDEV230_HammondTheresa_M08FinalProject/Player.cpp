@@ -175,7 +175,7 @@ void Player::open_backpack() {
 
 bool Player::move_menu() { // this code is used by the MOVE option in MAIN menu
 
-	cout << "\nMove where?" << endl;
+	cout << "\nUse which door?" << endl;
 
 	string dir;
 	int choice = 2; // 2 is default cancel bc rooms always have at least 1 door
@@ -222,13 +222,11 @@ bool Player::move_menu() { // this code is used by the MOVE option in MAIN menu
 	cin.ignore(10000, '\n');
 
 	if ((choice >= counter) || (choice < 1)) { // player chooses cancel
-		cout << "\n>> You change your mind about moving." << endl;
+		cout << "\n>> You change your mind about using a door." << endl;
 		return false;
 	}
 	
 	counter = 0; // reusing this to find door of choice
-
-	cout << "\n"; // blank space for formatting (Examine text shows other stuff before Use text)
 
 	// look for player choice
 	for (int i = 0; i < 4; i++) {
@@ -249,10 +247,8 @@ bool Player::move(Door& door) { // move through actual door
 		if (door.a_rooms[j] != room) {
 			cout << "\n>> You move through the " << door.dir << door.name << "." << endl;
 			room = door.a_rooms[j]; // move player to that room
-			room->describe(); // tell us about the new room
-			if (room->visited) cout << "\n>> You have been here before." << endl;
-			if (!room->visited) room->visited = true; // mark room as visited if it hasn't been
 			move_count++;
+			if (room->get_visited()) cout << "\n>> You have been here before." << endl;
 			if (room->is_exit) return true; // return true only if player's is now in exit
 			else return false;
 			// potential combat activation here???
@@ -276,8 +272,7 @@ void Player::examine() {
 		// ADD: only access this if have sufficient light
 
 		// DRAW LOOK LIST
-		cout << "1 . . . Room" << endl; // look at the room itself (always at 1)
-		list_count = 2; // set list count start
+		list_count = 1; // set list count start
 		// show doors (if they exist)
 		// iterate through a_doors and if any found, show them and their location, iterate list count, and put dir values in doors
 		for (int i = 0; i < 4; i++) {
@@ -330,18 +325,12 @@ void Player::examine() {
 		if ((choice >= (room->item_list.size() + list_count)) || (choice < 1)) {
 			cout << "\n>> You decide to do something else." << endl; // nothing else happens; loops back to main menu
 			break;
-			//look_exit = true;
-			//continue;
 		}
 
 		// if cancel not chosen, do stuff depending on what item was selected (oh my god this is a nightmare lol)
-		if (choice == 1) { // current room selected
-			room->describe();
-			// stay inside loop
-		}
-		else if ((choice >= 2) && (choice <= room->door_count + 1)) { // choice is a door, show status of that door
+		if ((choice >= 1) && (choice <= room->door_count)) { // choice is a door, show status of that door
 			// find the correct door using math lol
-			int counter = choice - 2; // will use this to count down until find the nth door chosen by choice
+			int counter = choice - 1; // will use this to count down until find the nth door chosen by choice
 			for (int d = 0; d < 4; d++) { // iterate through possible doors in room
 				if (room->a_doors[d]) // if door exists
 					if (counter == 0) {
@@ -353,8 +342,8 @@ void Player::examine() {
 					else counter--; // decrement counter			
 			}
 		}
-		else if (choice >= room->door_count + 2) { // choice is a chest (if it exists)
-			if ((room->chest) && (choice == room->door_count + 2)) {
+		else if (choice >= room->door_count + 1) { // choice is a chest (if it exists)
+			if ((room->chest) && (choice == room->door_count + 1)) {
 				room->chest->describe(); // show info about chest
 				room->chest->status();
 				look_exit = interact(room->chest, 0); // start interaction menu

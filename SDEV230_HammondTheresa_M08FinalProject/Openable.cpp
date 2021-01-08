@@ -68,6 +68,6 @@ int Openable::open_action(Player& player) { // what item does when it's opened
 }
 
 void Openable::status() { // no new line bc pairs with other flavor text
-	if (!open) cout << ">> The " << dir << name << " is closed." << endl;
-	else cout << ">> The " << dir << name << " is open." << endl;
+	if (!open) cout << endl << ">> The " << dir << name << " is closed." << endl;
+	else cout << endl << ">> The " << dir << name << " is open." << endl;
 }

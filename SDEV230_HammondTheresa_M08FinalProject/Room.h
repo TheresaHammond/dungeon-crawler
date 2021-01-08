@@ -13,7 +13,8 @@ class Room {
 	friend class Player;
 	friend class Item;
 private:
-	Chest* chest;
+	Entity* enemy; // holds enemy (may turn into a list later)
+	Chest* chest; // each room can hold 1 chest max
 	int x;
 	int y;
 	std::string map_icon;
@@ -38,6 +39,8 @@ public:
 	void describe();
 	int get_x();
 	int get_y();
+	bool get_visited();
 	void set_visited();
+	Entity*& get_enemy();
 	bool is_an_exit(void); // returns whether room is exit or not
 };

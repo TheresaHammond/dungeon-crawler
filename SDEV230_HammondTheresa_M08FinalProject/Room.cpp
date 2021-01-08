@@ -11,6 +11,7 @@ Room::Room(void) { // CONSTRUCTOR
 }
 Room::Room(int x, int y, int i) { // CONSTRUCTOR
 	// cout << "Room created" << "(" << x << ", " << y << ")" << endl;
+	this->enemy = nullptr;
 	this->chest = nullptr;
 	this->x = x;
 	this->y = y;
@@ -44,9 +45,19 @@ int Room::get_x() {
 int Room::get_y() {
 	return y;
 }
+
+bool Room::get_visited() {
+	return visited;
+}
+
 void Room::set_visited() {
 	this->visited = true;
 }
+
+Entity*& Room::get_enemy() {
+	return enemy;
+}
+
 // ADD ITEMS TO ROOM INVENTORY
 void Room::add_item(Item* item) { 
 	item_list.push_back(item);

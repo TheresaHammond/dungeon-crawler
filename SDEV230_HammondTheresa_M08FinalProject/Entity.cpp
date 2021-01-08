@@ -7,14 +7,14 @@
 using namespace std;
 
 Entity::Entity(void) { // CONSTRUCTOR
-	this->hp = 10;
+	this->hp = 1;
 	this->level = 0;
 	this->xp = 0;
 	this->maxxp = 0;
 	this->maxhp = hp;
-	this->atk = 3;
-	this->def = 3;
-	this->intel = 3;
+	this->atk = 0;
+	this->def = 0;
+	this->intel = 0;
 	this->name = "Unknown Entity";
 	this->weapon = nullptr;
 	this->armor = nullptr;
@@ -46,7 +46,7 @@ int Entity::get_intel() { // intel getter
 void Entity::set_room(Room* room) { // room setter
 	this->room = room;
 }
-Room* Entity::get_room() { // room getter
+Room*& Entity::get_room() { // room getter
 	return this->room;
 }
 void Entity::set_name(string name) { // name setter

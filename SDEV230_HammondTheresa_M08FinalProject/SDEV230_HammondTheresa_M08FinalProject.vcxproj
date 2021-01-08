@@ -148,6 +148,7 @@
     <ClCompile Include="IronSword.cpp" />
     <ClCompile Include="Item.cpp" />
     <ClCompile Include="Key.cpp" />
+    <ClCompile Include="Kobold.cpp" />
     <ClCompile Include="LeatherArmor.cpp" />
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="Openable.cpp" />
@@ -165,6 +166,7 @@
     <ClInclude Include="IronSword.h" />
     <ClInclude Include="Item.h" />
     <ClInclude Include="Key.h" />
+    <ClInclude Include="Kobold.h" />
     <ClInclude Include="LeatherArmor.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="Openable.h" />

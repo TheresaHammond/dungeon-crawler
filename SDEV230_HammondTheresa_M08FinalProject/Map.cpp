@@ -5,6 +5,8 @@
 #include "IronSword.h"
 #include "LeatherArmor.h"
 
+#include "Kobold.h"
+
 #include <algorithm> // for random_shuffle()
 
 using namespace std;
@@ -53,6 +55,11 @@ Map::Map(int size, Player& player, bool debg) { // CONSTRUCTOR (generates entire
 	 item = new LeatherArmor;
 	 start->item_list.push_back(item);
 	 item = nullptr;
+
+	 // put enemy in starting room? (for testing)
+	 Entity* enemy = new Kobold;
+	 start->enemy = enemy;
+	 enemy = nullptr;
 
 	 cout << ">> Dungeon generation complete!" << endl;
 }
