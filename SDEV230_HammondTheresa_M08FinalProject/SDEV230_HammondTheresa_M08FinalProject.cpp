@@ -33,6 +33,32 @@ bool debg = false; // debug flag
 
 // DEFINE FUNCTIONS
 
+bool yn_choice() { // basic yes/no menu
+
+	int choice;
+
+	cout << "\nIs this correct?" << endl;
+	cout << "1 . . . Yes" << endl;
+	cout << "2 . . . No" << endl;
+
+	cout << "Enter choice: ";
+	while (!(cin >> choice)) {
+		cout << "\n>> Whoops! Try again." << endl;
+		cin.clear();
+		cin.ignore(10000, '\n');
+		cout << "Enter choice: ";
+	}
+	cin.clear(); // clear input buffer
+	cin.ignore(10000, '\n');
+
+	switch (choice) {
+	case 1: // yes
+		return true;
+	default: // no
+		return false;
+	}
+}
+
 // combat state!
 bool state_combat(Player &player, Entity &enemy) {
 	int choice;
@@ -106,8 +132,9 @@ bool state_combat(Player &player, Entity &enemy) {
 		player.level_up(); // check for level-up
 
 		// transfer enemy items to drop obj in room
-		// delete enemy
-		delete &enemy;
+
+		delete &enemy; // delete enemy
+
 		return false; // leave combat state
 	}
 
@@ -239,14 +266,57 @@ int main(void)
 	}
 
 	// get player name
-	cout << "\nPlease enter your name: ";
+	cout << "\nWhat is your name?" << endl;
+	cout << "Enter name: ";
 	cin >> name;
 	if (name == "") name = "Default Dan";
 	cout << "\n>> You are " << name << "." << endl;
 
+	string background; // used in following menu
+	
+	// get player background
+	while (true) {
+	cout << "\nWho are you?" << endl;
+	cout << "1 . . . Knight" << endl;
+	cout << "2 . . . Explorer" << endl;
+	cout << "3 . . . Sacrifice" << endl;
+	cout << "Enter choice: ";
+	while (!(cin >> choice)) { // input validation
+		cout << "\n>> Whoops! Try again." << endl;
+		cin.clear();
+		cin.ignore(10000, '\n');
+		cout << "Enter choice: ";
+	}
+	cin.clear(); // clear input buffer
+	cin.ignore(10000, '\n');
+	
+	switch (choice) {
+		case 1: // knight
+			cout << "\n>> [Knight]: (Background)" << endl;
+			cout << ">> You are a hero, come to slay the evil being in the dungeon depths." << endl;
+			background = "Knight";
+			break; // break out of switch but NOT while loop
+		case 2: // explorer
+			cout << "\n>> [Explorer]: (Background)" << endl;
+			cout << ">> You are a scholar, come to learn about the fabled mysteries of the deep." << endl;
+			background = "Explorer";
+			break;
+		case 3: // sacrifice
+			cout << "\n>> [Sacrifice]: (Background)" << endl;
+			cout << ">> You are a sacrifice to appease the dungeon's great evil, abandoned here to die." << endl;
+			background = "Sacrifice";
+			break;
+		default: // out of range
+			cout << "\n>> You must make a choice." << endl;
+			continue; // will start menu again and NOT go to y/n menu
+		}
+
+	if (yn_choice()) break; // if confirmed yes, break out of while loop
+	}
+
 	// CREATE OBJS
 	// player obj
-	Player player(name);
+	Player player(name, background);
 
 	// generate map and set player in starting room
 	Map map(map_size, player, debg);

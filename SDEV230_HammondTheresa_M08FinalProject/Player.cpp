@@ -6,8 +6,9 @@
 
 using namespace std;
 
-Player::Player(string name) { // constructor
+Player::Player(string name, string background) { // constructor
 	this->name = name;
+	this->background = background;
 	this->type = "Player";
 	this->level = 1;
 	this->xp = 0;

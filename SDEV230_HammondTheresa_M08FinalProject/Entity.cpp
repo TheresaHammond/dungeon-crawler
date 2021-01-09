@@ -106,6 +106,8 @@ void Entity::get_stats() { // draws current entity stats
 	// vitals
 	cout << "\nNAME: " << name << endl;
 
+	cout << "CLASS: " << background << endl;
+
 	cout << "LEVEL: " << level << endl;
 	cout << "NEXT: " << (maxxp - xp) << " XP" << endl;
 

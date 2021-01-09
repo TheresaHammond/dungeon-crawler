@@ -17,6 +17,7 @@ protected:
 	int maxxp; // max exp to next level
 	std::string name;
 	std::string type; // identifier (player, enemy, NPC, etc)
+	std::string background; // entity class (might be used for fun)
 	Room* room; // pointer to current location
 	int atk; // attack power
 	int def; // defense

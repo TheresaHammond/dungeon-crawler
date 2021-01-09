@@ -7,6 +7,7 @@ using namespace std;
 Kobold::Kobold(void) { // constructor
 	this->name = "Kobold";
 	this->type = "Enemy";
+	this->background = "Fighter";
 	this->xp = 20; // xp value given when defeated
 	this->hp = 10;
 	this->maxhp = hp;

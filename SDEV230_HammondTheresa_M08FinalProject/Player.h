@@ -22,7 +22,7 @@ private:
 	bool bigkey; // whether or not player has big key
 public:
 	Player(void);
-	Player(std::string name);
+	Player(std::string name, std::string background);
 	void addto_backpack(Item* item);
 	void open_backpack();
 	void examine();
