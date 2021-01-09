@@ -1,12 +1,14 @@
 #include "Entity.h"
 #include "Item.h"
 #include "Room.h"
+
 #include <iostream>
 #include <string>
 
 using namespace std;
 
 Entity::Entity(void) { // CONSTRUCTOR
+	this->gems = 0;
 	this->hp = 1;
 	this->level = 0;
 	this->xp = 0;
@@ -14,35 +16,80 @@ Entity::Entity(void) { // CONSTRUCTOR
 	this->maxhp = hp;
 	this->atk = 0;
 	this->def = 0;
-	this->intel = 0;
 	this->name = "Unknown Entity";
 	this->weapon = nullptr;
 	this->armor = nullptr;
 }
-void Entity::set_hp(int change) { // hp setter
-	this->hp = change;
+
+void Entity::attack(Entity& target) { // physical attack
+	int pwr;
+	int dmg;
+
+	// check whether target is player or not (for flavor text)
+	if (target.type == "Player") 
+		cout << "\n>> The enemy " << name << " attacks you!" << endl; // target is player
+	else 
+		cout << "\n>> You attack the enemy " << target.name << "!" << endl; // target is enemy
+
+	// calculate attacker's attack power
+	if (weapon) pwr = weapon->effect + atk; // if attacker has weapon, add its effect to damage power
+	else pwr = atk;
+
+	// calculate damage
+	dmg = pwr - target.def; // subtract target's defense from attacker's attack power
+	if (dmg < 0) dmg = 0; // limit negative values to 0
+
+	// apply damage to target
+	target.hp = (target.hp - dmg);
+	if (target.hp < 0) target.hp = 0; // limit negative values to 0
+
+	// flavor text
+	if (target.type == "Player")
+		cout << ">> You take " << dmg << " damage!" << endl; // target is player
+	else 
+		cout << ">> The enemy " << target.name << " takes " << dmg << " damage!" << endl; // target is enemy
 }
+
+void Entity::set_xp(int value) { // xp setter
+	this->xp = value;
+}
+
+int Entity::get_xp() { // xp getter
+	return xp;
+}
+
+void Entity::set_hp(int value) { // hp setter
+	this->hp = value;
+}
+
 int Entity::get_hp() { // hp getter
-	return this->hp;
+	return hp;
 }
-void Entity::set_str(int change) { // str setter
-	this->atk = change;
+
+void Entity::set_maxhp(int value) {
+	this->maxhp = value;
 }
-int Entity::get_str() { // str getter
+
+int Entity::get_maxhp() {
+	return maxhp;
+}
+
+void Entity::set_atk(int value) { // str setter
+	this->atk = value;
+}
+
+int Entity::get_atk() { // str getter
 	return atk;
 }
-void Entity::set_def(int change) { // def setter
-	this->def = change;
+
+void Entity::set_def(int value) { // def setter
+	this->def = value;
 }
+
 int Entity::get_def() { // def getter
 	return def;
 }
-void Entity::set_intel(int change) { // intel setter
-	this->intel = change;
-}
-int Entity::get_intel() { // intel getter
-	return intel;
-}
+
 void Entity::set_room(Room* room) { // room setter
 	this->room = room;
 }

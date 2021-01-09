@@ -8,14 +8,14 @@ using namespace std;
 
 Player::Player(string name) { // constructor
 	this->name = name;
+	this->type = "Player";
 	this->level = 1;
 	this->xp = 0;
-	this->maxxp = 50;
+	this->maxxp = 10;
 	this->hp = 20; // health points
 	this->maxhp = hp;
 	this->atk = 5; // strength
 	this->def = 5; // defense
-	this->intel = 5; // intelligence
 	this->move_count = 0; // number of times player has changed rooms
 	this->keyring = 100; // number of keys player currently has
 	this->bigkey = false; // whether player has big key
@@ -47,6 +47,9 @@ void Player::open_backpack() {
 	else cout << " keys";
 	if (bigkey) cout << " and a Big Key";
 	cout << " on your key ring." << endl;
+
+	// show amount of gems a player has
+	cout << ">> You have " << gems << "gems." << endl;
 
 	// show backpack item list
 	while ((item_choice != (backpack.size() + 1)) && (menu_choice != 5)) {
@@ -569,5 +572,29 @@ void Player::status_menu(void) { // player can look at and modify stats and equi
 			cout << "\n>> You decide to do something else." << endl;
 			return; // exit to MAIN
 		}
+	}
+}
+
+void Player::level_up() { // check for and execute level-up!
+	if (xp >= maxxp) {
+		cout << "\n>> You have leveled up!" << endl;
+		level++;
+
+		// set new xp values
+		int over = xp - maxxp; // calculate leftover XP
+		maxxp *= 2; // double max limit for next level (fix later?)
+		xp = over; // reset xp and add leftovers
+
+		// calculate stat gain values (fix this later)
+		int atkup = level + 1;
+		int defup = level + 1;
+		int hpup = level * 5;
+		atk += atkup; // update player values
+		def += defup;
+		maxhp += hpup;
+		hp += hpup;
+		cout << ">> HP +" << hpup << endl;
+		cout << ">> ATK +" << atkup << endl;
+		cout << ">> DEF +" << defup << endl;
 	}
 }

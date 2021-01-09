@@ -30,6 +30,7 @@ public:
 	bool move(Door& door);
 	bool interact(Item* item, int index);
 	void status_menu();
+	void level_up();
 };
 
 

@@ -6,13 +6,16 @@ using namespace std;
 
 Kobold::Kobold(void) { // constructor
 	this->name = "Kobold";
-	this->hp = 50;
+	this->type = "Enemy";
+	this->xp = 20; // xp value given when defeated
+	this->hp = 10;
 	this->maxhp = hp;
 	this->level = 1;
 	this->atk = 3;
 	this->def = 3;
 	this->weapon = new IronSword;
 	this->armor = new LeatherArmor;
+	this->gems = (rand() % 10 + 1) + level; // between 1 and 10 gems plus level modifier
 }
 
 Kobold::~Kobold(void) { // destructor

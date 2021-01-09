@@ -32,52 +32,51 @@ using namespace std;
 bool debg = false; // debug flag
 
 // DEFINE FUNCTIONS
+
 // combat state!
-bool state_combat(Player &player, Entity &entity) {
+bool state_combat(Player &player, Entity &enemy) {
 	int choice;
 	int damage;
-	string enemy = entity.get_name();
 
-	if (player.get_hp() <= 0) { // you died
-		cout << "\n>> You are dead." << endl;
-		return false; // leave combat state
-	} else if (entity.get_hp() <= 0) {
-		cout << "\n>> Enemy " << enemy << " has been defeated!" << endl;
-		// run post-combat stuff
-		return false; // leave combat state
-	} else { // PLAYER ACTION
-		cout << "\nWhat's your next move?" << endl;
-		cout << "1 . . . Attack" << endl; // attack enemy
-		cout << "2 . . . Defend" << endl; // defend from attack
-		cout << "3 . . . Open backpack" << endl; // player.open_backpack();
-		cout << "4 . . . Use spell" << endl; // open spellbook
-		cout << "5 . . . Talk" << endl; // attempt to communicate
-		cout << "6 . . . Run" << endl; // go back to previous room (if possible)
-		cout << "Enter choice: ";
-		while (!(cin >> choice)) {
-			cout << "\n>> Whoops! Try again." << endl;
-			cin.clear();
-			cin.ignore(10000, '\n');
-			cout << "Enter choice: ";
-		}
-		cin.clear(); // clear input buffer
+	// drops
+	int gems;
+	int keys;
+	int xp;
+
+	// SHOW BATTLE STATS
+	cout << "\n>> " << player.get_name() << ": " << player.get_hp() << "/" << player.get_maxhp() << " HP" << endl; // player
+	// show for each enemy (when multiple are implemented)
+	cout << ">> " << enemy.get_name() << ": " << enemy.get_hp() << "/" << enemy.get_maxhp() << " HP" << endl; // enemy
+
+	// PLAYER ACTION MENU
+	cout << "\nWhat's your next move?" << endl;
+	cout << "1 . . . Attack" << endl; // attack enemy
+	cout << "2 . . . Defend" << endl; // defend from attack
+	cout << "3 . . . Open backpack" << endl; // player.open_backpack();
+	cout << "4 . . . Use spell" << endl; // open spellbook
+	cout << "5 . . . Talk" << endl; // attempt to communicate
+	cout << "6 . . . Run" << endl; // go back to previous room (if possible)
+	cout << "Enter choice: ";
+	while (!(cin >> choice)) {
+		cout << "\n>> Whoops! Try again." << endl;
+		cin.clear();
 		cin.ignore(10000, '\n');
+		cout << "Enter choice: ";
+	}
+	cin.clear(); // clear input buffer
+	cin.ignore(10000, '\n');
 
-		switch (choice) { // actions based on choice
+	switch (choice) { // actions based on choice
 		case 1: // Attack
-			cout << "\n>> You attack the " << enemy << "!" << endl;
-			// calculate damage
-			damage = 30; // change this later
-			if (damage < 0) damage = 0; // prevent negative numbers
-			cout << ">> The enemy " << enemy << " takes " << damage << " damage." << endl;
-			entity.set_hp(damage);
+			player.attack(enemy);
 			break;
 		case 2: // Defend
 			cout << "\n>> Not yet implemented." << endl;
 			break;
 		case 3: // Open backpack
-			cout << "\n>> You open your backpack." << endl;
-			player.open_backpack(); // open the inventory (list items)
+			cout << "\n>> Not yet implemented." << endl;
+			// cout << "\n>> You open your backpack." << endl;
+			// player.open_backpack(); // open the inventory (list items)
 			break;
 		case 4: // Use spell
 			cout << "\n>> Not yet implemented." << endl;
@@ -86,22 +85,41 @@ bool state_combat(Player &player, Entity &entity) {
 			cout << "\n>> Not yet implemented." << endl;
 			break;
 		case 6: // Run
-			cout << "\n>> You attempt to flee!" << endl;
-			cout << ">> You have escaped." << endl;
+			cout << "\n>> Not yet implemented." << endl;
 			// cout << ">> You escape to the previous room." << endl;
-			return false; // leave combat state
+			// return false; // leave combat state
 			break;
 		default:
 			cout << "\n>> You do nothing." << endl;
-		}
-
-		// ENEMY ACTION (expand later/choice)
-		cout << "\n>> Enemy " << enemy << " attacks!" << endl;
-		damage = 10; // change this later
-		if (damage < 0) damage = 0; // prevent negative numbers
-		cout << ">> You take " << damage << " damage." << endl;
-		player.set_hp(damage);
 	}
+
+	// BATTLE END CHECK 1 (all enemies defeated)
+	if (enemy.get_hp() <= 0) {
+		cout << "\n>> Enemy " << enemy.get_name() << " dies." << endl;
+
+		// if all enemies have been defeated
+		cout << "\n>> You are victorious!" << endl;
+
+		// transfer enemy XP to player
+		cout << ">> You gain " << enemy.get_xp() << " XP." << endl;
+		player.set_xp(player.get_xp() + enemy.get_xp());
+		player.level_up(); // check for level-up
+
+		// transfer enemy items to drop obj in room
+		// delete enemy
+		delete &enemy;
+		return false; // leave combat state
+	}
+
+	// ENEMY ACTION (expand later w/ choice)
+	enemy.attack(player);
+
+	// BATTLE END CHECK 2 (player defeated)
+	if (player.get_hp() <= 0) {
+		cout << "\n>> You are dead." << endl;
+		return false; // leave combat state
+	}
+	else return true; // continue loop
 }
 
 // main menu function!
@@ -113,14 +131,15 @@ bool state_main(Player& player, Map& map) { // PASS OBJS BY REFERENCE!!!!!!
 	// if current room has enemy, switch to combat state! ends when either enemy or player dies
 	if (enemy) {
 		bool combat = true;
-		cout << "\n>> A " << enemy->get_name() << " attacks you!" << endl; // could use some variations here
+		cout << "\n>> A stray " << enemy->get_name() << " attacks you!" << endl; // could use some variations here
 		while (combat) { // remains true until combat ends (returns false)
 			combat = state_combat(player, *enemy); // what is going on with the references here?
-			if (player.get_hp() <= 0) {
-				return true; // game is over, you're dead
-			}
-			// else victory screen goes here?
 		}
+		// check if player still alive
+		if (player.get_hp() <= 0) {
+			return true; // game is over, you're dead
+		}
+		else enemy = nullptr; // fix dangling pointer after enemy deletion
 	}
 
 	// reiterate room description every time menu renews (combat takes priority)
